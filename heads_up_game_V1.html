@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Heads Up!"/>
+<title>Heads Up!</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#1e1b4b;min-height:100vh;overflow-x:hidden;}
+button{cursor:pointer;font-family:inherit;-webkit-appearance:none;}
+input{font-family:inherit;-webkit-appearance:none;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:#ffffff44;border-radius:99px;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ── Kategoriler ──────────────────────────────────────────
+const DEFAULT_CATEGORIES = {
+  "🎬 Film & Dizi": [
+    "Yeşilçam","Recep İvedik","Kurtlar Vadisi","Diriliş Ertuğrul","Çukur","Ezel","Deli Yürek",
+    "Bir Zamanlar Osmanlı","Fatmagül'ün Suçu Ne","Gönülçelen","Paramparça","Karadayı",
+    "Arka Sokaklar","Pis Yedili","Adanalı","Muhteşem Yüzyıl","Aşk-ı Memnu","Leyla ile Mecnun",
+    "Organize İşler","G.O.R.A.","A.R.O.G.","Hababam Sınıfı","Şaban","Kemal Sunal","İnek Şaban",
+    "Tosun Paşa","Neşeli Günler","Tatlı Bela","Çarşamba Kocası","Züğürt Ağa","Banker Bilo",
+    "Propaganda","Vizontele","Uzak","İklimler","Kış Uykusu","Bir Zamanlar Anadolu'da",
+    "Nuri Bilge Ceylan","Yumurta","Üç Maymun","Ahlat Ağacı","Kuru Otlar","Haymana'nın Muzu",
+    "Anlat İstanbul","Fetih 1453","Dağ","Reis","Cumhuriyet","Sivas","Sarı Sıcak",
+    "Hayat Var","Benim Dünyam","Dünyanın En Güzel Kokusu","Rüzgârı Yakala","Çiçek Abbas",
+    "İstanbul Kanatlarımın Altında","Ağır Roman","Gemide","Eşkıya","Gece Yolculuğu",
+    "Bodrum Hakimi","Kiraz Mevsimi","Medcezir","Kara Para Aşk","İstanbullu Gelin",
+    "Sen Anlat Karadeniz","Hercai","Bir Küçük Gün Işığı","Masumlar Apartmanı","Kefaret",
+    "Yaratılan Rüyalar","Sadakatsiz","Yargı","Canevim","Gelsin Hayat Bildiği Gibi",
+    "Mehmed Bir Cihan Fatihi","Payitaht Abdülhamid","Alparslan","Barbaroslar",
+    "Osmanlı'dan Günümüze","Destan","Uyanış Büyük Selçuklu","Bambaşka Biri","Maraşlı",
+    "Fatih Harbiye","Gönül Dağı","Baht Oyunu","İçerde","Söz","Savaşçı",
+    "Poyraz Karayel","Kara Derin","Behzat Ç.","Şahsiyet","Ethos","Bir Başkadır",
+    "Atiye","Akrep","The Gift","Rise of Empires","Barbaros Hayreddin"
+  ],
+  "🎤 Türk Sanatçılar": [
+    "Tarkan","Sezen Aksu","Ajda Pekkan","Zeki Müren","Müslüm Gürses","İbrahim Tatlıses",
+    "Orhan Gencebay","Ferdi Tayfur","Bülent Ersoy","Zerrin Özer","Sertab Erener","Hadise",
+    "Mabel Matiz","Şebnem Ferah","Teoman","Duman","MFÖ","Bulutsuzluk Özlemi","Mor ve Ötesi",
+    "Athena","Manga","Kenan Doğulu","Hande Yener","Gülben Ergen","Nil Karaibrahimgil",
+    "Funda Arar","Serdar Ortaç","Mustafa Sandal","Emre Aydın","Yaşar","Haluk Levent",
+    "Yavuz Bingöl","Mahsun Kırmızıgül","Mehmet Erdem","Gripin","Çelik","Volkan Konak",
+    "Mazlum Çimen","Yıldız Tilbe","Fatih Erkoç","Pınar Aylin","Gökhan Kırdar",
+    "Ceza","Sagopa Kajmer","Anıl Piyancı","Ezhel","Norm Ender","Tepki",
+    "Ben Fero","Şehinşah","Murda","Patron","Contra","Khontkar","Defkhan",
+    "Ahmet Kaya","Zülfü Livaneli","Cem Karaca","Barış Manço","Erkin Koray","Fikret Kızılok",
+    "Selda Bağcan","Edip Akbayram","Moğollar","Kayahan","Alpay",
+    "Erol Evgin","Nükhet Duru","Oya Aydoğan","Neşet Ertaş","Aşık Veysel","Davut Sulari",
+    "Arif Sağ","Musa Eroğlu","Sabahat Akkiraz","Belkıs Akkale","Güler Duman",
+    "Melek Mosso","Bengü","Gülşen","Simge","İclal Aydın",
+    "Candan Erçetin","Müzeyyen Senar","Safiye Ayla","Münir Nurettin Selçuk",
+    "Tanju Okan","Emel Sayın","Hamiyet Yüceses","Zara","Hüsnü Arkan","Fazıl Say",
+    "Piyano","Keman","Bağlama","Davul","Zurna"
+  ],
+  "⚽ Spor & Futbol": [
+    "Fenerbahçe","Galatasaray","Beşiktaş","Trabzonspor","Başakşehir","Bursaspor",
+    "Altay","Göztepe","Altınordu","Adanaspor","Ankaragücü","Kayserispor",
+    "Hakan Şükür","Rüştü Reçber","Arda Turan","Hamit Altıntop","Tuncay Şanlı","Nihat Kahveci",
+    "Emre Belözoğlu","İlhan Mansız","Yıldıray Baştürk","Alpay Özalan","Okan Buruk",
+    "Fatih Terim","Mustafa Denizli","Şenol Güneş","Ersun Yanal","Aykut Kocaman",
+    "Alex de Souza","Jardel","Roberto Carlos","Sneijder","Drogba","Miloş Krasić",
+    "Burak Yılmaz","Volkan Demirel","Selçuk İnan","Umut Bulut","Semih Şentürk",
+    "Dünya Kupası 2002","Euro 2008","Türkiye Kupası","Süper Lig",
+    "Olimpiyat","Basketbol","Voleybol","Güreş","Tekvando","Atletizm","Yüzme",
+    "Naim Süleymanoğlu","Halil Mutlu","Taner Sağır",
+    "Şampiyonlar Ligi","UEFA Kupası","Penaltı","Sarı Kart",
+    "Kırmızı Kart","Ofsayt","Köşe Vuruşu","VAR Sistemi",
+    "Taraftar","Transfer","Milli Takım","Paralimpik",
+    "Formula 1","Motosiklet","Bisiklet","Tenis","Golf","Satranç","Bowling",
+    "Kayak","Snowboard","Buz Hokeyi","Boks","Judo","Karate","Eskrim",
+    "Cimbom","Sarı Lacivert","Kartal","Bordo Mavi","Kırmızı Beyaz",
+    "Stat","Taraftar Koreografisi","Deplasman","Forma","Kulüp","Teknik Direktör",
+    "Asistan Hakem","Kale","Dribling","Faul","Uzatma"
+  ],
+  "🏛️ Tarih & Kültür": [
+    "Osmanlı İmparatorluğu","Selçuklu","Bizans","Hitit","Sümer","Frigya","Lidya",
+    "Atatürk","İnönü","Özal","Cumhuriyet","Kurtuluş Savaşı","Çanakkale",
+    "Topkapı Sarayı","Dolmabahçe","Ayasofya","Sultanahmet","Kapalıçarşı","Mısır Çarşısı",
+    "Efes","Troya","Pamukkale","Kapadokya","Nemrut","Göbeklitepe","Çatalhöyük",
+    "Boğaziçi","Galata Kulesi","Kız Kulesi","Rumeli Hisarı",
+    "Fatih Sultan Mehmet","Kanuni Sultan Süleyman","Yavuz Sultan Selim","Abdülhamid",
+    "Mevlana","Yunus Emre","Hacı Bektaş Veli","Nasreddin Hoca","Dede Korkut",
+    "Karagöz-Hacivat","Ortaoyunu","Halk Dansları","Zeybek",
+    "Halay","Horon","Karşılama","Sema","Mevlevi","Bektaşi","Alevi",
+    "Ramazan","Kurban Bayramı","Nevruz","Hıdırellez","Kırkpınar","Yağlı Güreş",
+    "Türk Kahvesi","Çay","Nargile","Rakı","Meze","Sünnet Düğünü","Kına Gecesi",
+    "Nazar Boncuğu","Türk Hamamı","Çini Sanatı","Hat Sanatı","Ebru",
+    "Tezhip","Minyatür","Kilim","Halı","Bakır İşlemeciliği",
+    "İstanbul Fethi","Malazgirt","Mohaç","Viyana Kuşatması","Dandanakan",
+    "Tanzimat","Meşrutiyet","Cumhuriyet İlanı","Harf Devrimi","Köy Enstitüleri",
+    "Anadolu Medeniyetleri","Lidyalılar","İyonyalılar","Urartular","Frigler"
+  ],
+  "🍽️ Yemek & İçecek": [
+    "Döner","Kebap","Lahmacun","Pide","Börek","Gözleme","Mantı","Köfte","Kızartma",
+    "Dolma","Sarma","İmam Bayıldı","Karnıyarık","Musakka","Türlü","Güveç","Menemen",
+    "Çılbır","Kavurma","İşkembe","Paça","Kokoreç","Midye","Balık Ekmek",
+    "Hamsi","İstavrit","Lüfer","Çipura","Levrek","Karides","Ahtapot",
+    "Mercimek Çorbası","Ezogelin","Tarhana","Yayla Çorbası","Domates Çorbası",
+    "Pilav","Bulgur","Kuskus","Simit","Açma","Poğaça","Çörek","Kandil Simidi",
+    "Baklava","Kadayıf","Künefe","Tulumba","Lokma","Revani","Şekerpare","Helva",
+    "Aşure","Keşkül","Sütlaç","Muhallebi","Dondurma","Lokum","Akide Şekeri",
+    "Çay","Türk Kahvesi","Salep","Boza","Ayran","Şalgam","Limonata","Vişne Suyu",
+    "Rakı","Pastırma","Sucuk","Kaşar","Beyaz Peynir",
+    "Tulum Peyniri","Van Otlu Peyniri","Çerkez Tavuğu","Cacık","Haydari",
+    "Patlıcan Ezmesi","Acılı Ezme","Hummus","Tahin","Pekmez","Reçel","Kaymak",
+    "Adana Kebabı","Urfa Kebabı","İskender","Bursa İskender","Çiğ Köfte",
+    "Tantuni","Kumpir","Balık Sandviç","Kokoreç","Ciğer Sarma","Kuzu Tandır",
+    "Fırın Sütlaç","Kazandibi","Kemalpaşa Tatlısı","Tahin Helvası"
+  ],
+  "🌍 Türkiye Coğrafyası": [
+    "İstanbul","Ankara","İzmir","Bursa","Antalya","Adana","Konya","Gaziantep",
+    "Trabzon","Samsun","Kayseri","Mersin","Diyarbakır","Erzurum","Van","Malatya",
+    "Boğaziçi","Marmara Denizi","Karadeniz","Ege Denizi","Akdeniz",
+    "Ağrı Dağı","Erciyes","Uludağ","Kaçkar","Süphan","Palandöken","Ilgaz",
+    "Fırat","Dicle","Kızılırmak","Yeşilırmak","Sakarya","Gediz","Menderes",
+    "Van Gölü","Tuz Gölü","Beyşehir","Eğirdir","İznik","Sapanca","Abant",
+    "Kapadokya","Pamukkale","Nemrut","Efes","Troya","Aspendos","Perge",
+    "Bodrum","Marmaris","Fethiye","Alanya","Side","Kaş","Ölüdeniz",
+    "Çeşme","Kuşadası","Didim","Foça","Ayvalık","Bozcaada","Gökçeada",
+    "Artvin","Rize","Giresun","Ordu","Tirebolu","Amasra","Sinop","Kastamonu",
+    "Harran","Şanlıurfa","Göbeklitepe","Mardin","Midyat","Hasankeyf",
+    "Doğubayazıt","Ishak Paşa","Kars","Ani","Iğdır","Ardahan",
+    "Bursa Ovası","Çukurova","Konya Ovası","Harran Ovası","Gediz Ovası",
+    "Toroslar","Pontus Dağları","Kuzey Anadolu Dağları","İç Anadolu Platosu",
+    "Türk Boğazları","Çanakkale Boğazı","İstanbul Boğazı","Marmara",
+    "Edirne","Kırklareli","Tekirdağ","Çanakkale","Balıkesir","Muğla"
+  ]
+};
+
+const TIMERS = [30,60,90];
+const REFILL_THRESHOLD = 10;
+
+function shuffle(a){return[...a].sort(()=>Math.random()-.5);}
+function todayKey(){const d=new Date();return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;}
+function getUsed(cat){try{const r=localStorage.getItem(`hu_used_${cat}_${todayKey()}`);return r?JSON.parse(r):[];}catch{return[];}}
+function addUsed(cat,words){try{const e=getUsed(cat);localStorage.setItem(`hu_used_${cat}_${todayKey()}`,JSON.stringify([...new Set([...e,...words])]));}catch{}}
+function loadCreated(){try{const s=localStorage.getItem("headsup_created");return s?JSON.parse(s):{};}catch{return{};}}
+function saveCreatedLS(o){try{localStorage.setItem("headsup_created",JSON.stringify(o));}catch{}}
+
+function buildDeck(cat,allCats){
+  const all=allCats[cat]||[];
+  const used=getUsed(cat);
+  let avail=all.filter(w=>!used.includes(w));
+  if(avail.length<=REFILL_THRESHOLD){avail=[...all];localStorage.removeItem(`hu_used_${cat}_${todayKey()}`);}
+  return shuffle(avail);
+}
+
+function remainingInfo(cat,allCats){
+  const all=allCats[cat]||[];
+  const used=getUsed(cat);
+  const rem=all.filter(w=>!used.includes(w)).length;
+  if(rem<=REFILL_THRESHOLD)return{text:"🔄 Sıfırlandı",color:"#fbbf24"};
+  return{text:`${rem}/${all.length} kelime`,color:"#a5b4fc"};
+}
+
+// ── State ────────────────────────────────────────────────
+let S={
+  screen:"menu",
+  created:loadCreated(),
+  selectedCat:null,
+  selectedTimer:60,
+  editKey:null,createCat:"",createWords:[],wordInput:"",
+  confirmDelete:null,
+  deck:[],cardIdx:0,timeLeft:0,correct:0,passed:0,flash:null,
+  roundResults:[],
+  timerIv:null,
+};
+function allCats(){return{...DEFAULT_CATEGORIES,...S.created};}
+function set(patch){Object.assign(S,typeof patch==="function"?patch(S):patch);render();}
+
+// ── Tilt ─────────────────────────────────────────────────
+let tiltLocked=false;
+let tiltEnabled=false;
+
+function requestTilt(cb){
+  if(typeof DeviceMotionEvent!=="undefined"&&typeof DeviceMotionEvent.requestPermission==="function"){
+    DeviceMotionEvent.requestPermission().then(r=>{if(r==="granted"){tiltEnabled=true;}cb();}).catch(()=>cb());
+  } else {tiltEnabled=true;cb();}
+}
+
+function onTilt(e){
+  if(S.screen!=="playing"||tiltLocked)return;
+  const beta=e.beta;
+  if(beta===null)return;
+  // Telefon yatay tutulduğunda beta ~0 civarı olur
+  // Geriye eğ (yukarı = doğru): beta negatif (-20'nin altı)
+  // İleriye eğ (aşağı = pas): beta pozitif (20'nin üstü ama yataydan itibaren)
+  if(beta<-15){tiltLocked=true;doCorrect();setTimeout(()=>{tiltLocked=false;},1100);}
+  else if(beta>15){tiltLocked=true;doPass();setTimeout(()=>{tiltLocked=false;},1100);}
+}
+
+// ── Game ─────────────────────────────────────────────────
+function startGame(){
+  if(!S.selectedCat)return;
+  requestTilt(()=>{
+    window.addEventListener("deviceorientation",onTilt,true);
+    const deck=buildDeck(S.selectedCat,allCats());
+    clearInterval(S.timerIv);
+    const iv=setInterval(()=>{
+      if(S.screen!=="playing"){clearInterval(iv);return;}
+      set(s=>{
+        if(s.timeLeft<=1){
+          clearInterval(iv);
+          window.removeEventListener("deviceorientation",onTilt,true);
+          return{timeLeft:0,screen:"result",timerIv:null};
+        }
+        return{timeLeft:s.timeLeft-1};
+      });
+    },1000);
+    set({deck,cardIdx:0,correct:0,passed:0,roundResults:[],timeLeft:S.selectedTimer,flash:null,screen:"playing",timerIv:iv});
+  });
+}
+
+function doCorrect(){
+  const word=S.deck[S.cardIdx];
+  if(word){set(s=>({correct:s.correct+1,roundResults:[...s.roundResults,{word,result:"correct"}],cardIdx:s.cardIdx+1}));addUsed(S.selectedCat,[word]);}
+  else set(s=>({cardIdx:s.cardIdx+1}));
+  flashAnim("correct");
+}
+function doPass(){
+  const word=S.deck[S.cardIdx];
+  if(word){set(s=>({passed:s.passed+1,roundResults:[...s.roundResults,{word,result:"pass"}],cardIdx:s.cardIdx+1}));}
+  else set(s=>({cardIdx:s.cardIdx+1}));
+  flashAnim("pass");
+}
+let flashT=null;
+function flashAnim(type){set({flash:type});clearTimeout(flashT);flashT=setTimeout(()=>set({flash:null}),500);}
+
+function saveGame(){
+  const key=S.createCat.trim();
+  if(!key||S.createWords.length===0)return;
+  const updated={...S.created};
+  if(S.editKey&&S.editKey!==key)delete updated[S.editKey];
+  updated[key]=S.createWords;
+  saveCreatedLS(updated);
+  set({created:updated,screen:"menu",editKey:null,createCat:"",createWords:[],wordInput:""});
+}
+function deleteGame(key){
+  const updated={...S.created};delete updated[key];saveCreatedLS(updated);
+  set({created:updated,confirmDelete:null,selectedCat:S.selectedCat===key?null:S.selectedCat});
+}
+
+// ── DOM helpers ──────────────────────────────────────────
+function h(tag,attrs,children){
+  const e=document.createElement(tag);
+  for(const[k,v]of Object.entries(attrs||{})){
+    if(k==="style"&&typeof v==="object")Object.assign(e.style,v);
+    else if(k.startsWith("on"))e.addEventListener(k.slice(2).toLowerCase(),v);
+    else e.setAttribute(k,v);
+  }
+  for(const c of(children||[])){
+    if(c==null)continue;
+    if(typeof c==="string"||typeof c==="number")e.appendChild(document.createTextNode(String(c)));
+    else e.appendChild(c);
+  }
+  return e;
+}
+const div=(a,c)=>h("div",a,c);
+const btn=(a,c)=>h("button",a,c);
+const inp=a=>h("input",a);
+const span=(a,c)=>h("span",a,c);
+
+// ── Screens ──────────────────────────────────────────────
+function renderPlaying(){
+  const{deck,cardIdx,correct,passed,timeLeft,selectedTimer,flash,selectedCat}=S;
+  const bg=flash==="correct"?"#16a34a":flash==="pass"?"#dc2626":"#1e1b4b";
+  const pct=(timeLeft/selectedTimer)*100;
+  const tc=timeLeft<=10?"#ef4444":timeLeft<=20?"#f97316":"#22c55e";
+  const word=deck[cardIdx]||null;
+
+  return div({style:{minHeight:"100vh",background:bg,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"space-between",padding:"env(safe-area-inset-top,24px) 16px 24px",transition:"background .3s",userSelect:"none"}},[
+    div({style:{width:"100%",maxWidth:"400px",paddingTop:"8px"}},[
+      div({style:{display:"flex",justifyContent:"space-between",color:"#fff",marginBottom:"6px",fontSize:"14px"}},[
+        span({},["✅ "+correct]),
+        span({style:{fontSize:"22px",fontWeight:"700",color:tc}},[timeLeft+"s"]),
+        span({},["⏭ "+passed]),
+      ]),
+      div({style:{background:"#ffffff33",borderRadius:"99px",height:"8px",overflow:"hidden"}},[
+        div({style:{height:"100%",width:pct+"%",background:tc,borderRadius:"99px",transition:"width 1s linear"}},[])
+      ])
+    ]),
+    div({style:{flex:"1",display:"flex",alignItems:"center",justifyContent:"center",width:"100%",maxWidth:"400px"}},[
+      div({style:{background:"#fff",borderRadius:"24px",padding:"40px 24px",textAlign:"center",width:"100%",boxShadow:"0 8px 32px rgba(0,0,0,.25)"}},[
+        div({style:{fontSize:"11px",color:"#6b7280",marginBottom:"8px",letterSpacing:"2px",textTransform:"uppercase"}},[selectedCat]),
+        word
+          ? div({style:{fontSize:"34px",fontWeight:"800",color:"#1e1b4b",lineHeight:"1.2",minHeight:"80px",display:"flex",alignItems:"center",justifyContent:"center"}},[word])
+          : div({style:{fontSize:"26px",fontWeight:"800",color:"#6b7280",minHeight:"80px",display:"flex",alignItems:"center",justifyContent:"center"}},["🎉 Kartlar bitti!"])
+      ])
+    ]),
+    div({style:{width:"100%",maxWidth:"400px"}},[
+      div({style:{color:"#ffffffaa",textAlign:"center",fontSize:"12px",marginBottom:"10px"}},["Geriye eğ → ✅ Doğru  ·  İleriye eğ → ⏭ Pas"]),
+      div({style:{display:"flex",gap:"12px"}},[
+        btn({style:{flex:"1",padding:"20px 0",borderRadius:"16px",background:"#ef4444",border:"none",color:"#fff",fontSize:"18px",fontWeight:"700"},onClick:doPass},["⬇ Pas"]),
+        btn({style:{flex:"1",padding:"20px 0",borderRadius:"16px",background:"#22c55e",border:"none",color:"#fff",fontSize:"18px",fontWeight:"700"},onClick:doCorrect},["⬆ Doğru"]),
+      ])
+    ])
+  ]);
+}
+
+function renderResult(){
+  const{correct,passed,selectedCat,roundResults}=S;
+  const resultItems=roundResults.map(r=>
+    div({style:{display:"flex",alignItems:"center",justifyContent:"space-between",background:r.result==="correct"?"#f0fdf4":"#fef2f2",borderRadius:"10px",padding:"8px 14px"}},[
+      span({style:{fontWeight:"600",color:"#1e1b4b",fontSize:"15px"}},[r.word]),
+      span({style:{fontSize:"18px"}},[r.result==="correct"?"✅":"⏭"])
+    ])
+  );
+  return div({style:{minHeight:"100vh",background:"linear-gradient(135deg,#1e1b4b,#312e81)",padding:"32px 16px",display:"flex",flexDirection:"column",alignItems:"center"}},[
+    div({style:{background:"#fff",borderRadius:"28px",padding:"32px 24px",maxWidth:"400px",width:"100%",boxShadow:"0 8px 40px rgba(0,0,0,.4)"}},[
+      div({style:{textAlign:"center",marginBottom:"20px"}},[
+        div({style:{fontSize:"48px"}},["🎉"]),
+        div({style:{fontSize:"26px",fontWeight:"800",color:"#1e1b4b",margin:"8px 0 2px"}},["Süre Doldu!"]),
+        div({style:{color:"#6b7280"}},[selectedCat])
+      ]),
+      div({style:{display:"flex",gap:"12px",justifyContent:"center",marginBottom:"20px"}},[
+        div({style:{background:"#f0fdf4",borderRadius:"16px",padding:"16px 24px",textAlign:"center"}},[
+          div({style:{fontSize:"36px",fontWeight:"800",color:"#16a34a"}},[String(correct)]),
+          div({style:{fontSize:"13px",color:"#16a34a"}},["Doğru"])
+        ]),
+        div({style:{background:"#fef2f2",borderRadius:"16px",padding:"16px 24px",textAlign:"center"}},[
+          div({style:{fontSize:"36px",fontWeight:"800",color:"#dc2626"}},[String(passed)]),
+          div({style:{fontSize:"13px",color:"#dc2626"}},["Pas"])
+        ])
+      ]),
+      resultItems.length?div({style:{marginBottom:"20px"}},[
+        div({style:{fontSize:"12px",fontWeight:"700",color:"#6b7280",letterSpacing:"1.5px",marginBottom:"10px"}},["BU TURDAKİ KELİMELER"]),
+        div({style:{display:"flex",flexDirection:"column",gap:"6px",maxHeight:"220px",overflowY:"auto"}},resultItems)
+      ]):null,
+      btn({style:{width:"100%",padding:"14px 0",borderRadius:"14px",background:"#4f46e5",border:"none",color:"#fff",fontSize:"16px",fontWeight:"700",marginBottom:"10px"},onClick:startGame},["🔄 Tekrar Oyna"]),
+      btn({style:{width:"100%",padding:"14px 0",borderRadius:"14px",background:"#f3f4f6",border:"none",color:"#374151",fontSize:"16px",fontWeight:"600"},onClick:()=>set({screen:"menu"})},["← Ana Menü"])
+    ])
+  ]);
+}
+
+function renderCreate(){
+  const{createCat,createWords,wordInput,editKey}=S;
+  const canSave=createCat.trim()&&createWords.length>0;
+
+  const catInp=inp({value:createCat,placeholder:"ör. Türk Oyuncular",style:{width:"100%",padding:"10px 14px",borderRadius:"10px",border:"1.5px solid #e5e7eb",fontSize:"15px",outline:"none",marginTop:"8px",marginBottom:"20px"}});
+  catInp.addEventListener("input",e=>{S.createCat=e.target.value;});
+
+  const wInp=inp({value:wordInput,placeholder:"Kelime yaz, Enter veya Ekle",style:{flex:"1",padding:"10px 14px",borderRadius:"10px",border:"1.5px solid #e5e7eb",fontSize:"15px",outline:"none"}});
+  wInp.addEventListener("input",e=>{S.wordInput=e.target.value;});
+  wInp.addEventListener("keydown",e=>{if(e.key==="Enter"){const w=S.wordInput.trim();if(w&&!S.createWords.includes(w))set(s=>({createWords:[...s.createWords,w],wordInput:""}));else set({wordInput:""});}});
+
+  const chips=createWords.map(w=>span({style:{background:"#ede9fe",color:"#4f46e5",borderRadius:"99px",padding:"6px 12px",fontSize:"14px",fontWeight:"600",display:"inline-flex",alignItems:"center",gap:"6px"}},[
+    w,
+    span({style:{cursor:"pointer",color:"#7c3aed",fontWeight:"900"},onClick:()=>set(s=>({createWords:s.createWords.filter(x=>x!==w)}))},["×"])
+  ]));
+
+  return div({style:{minHeight:"100vh",background:"#f9fafb",padding:"env(safe-area-inset-top,24px) 16px 24px"}},[
+    div({style:{maxWidth:"420px",margin:"0 auto"}},[
+      btn({style:{background:"none",border:"none",color:"#4f46e5",fontSize:"15px",marginBottom:"16px",padding:"0"},onClick:()=>set({screen:"menu"})},["← Geri"]),
+      div({style:{fontSize:"26px",fontWeight:"800",color:"#1e1b4b",marginBottom:"20px"}},[editKey?"✏️ Düzenle":"✏️ Oyun Oluştur"]),
+      div({style:{fontSize:"13px",color:"#6b7280",fontWeight:"600"}},["KATEGORİ ADI"]),
+      catInp,
+      div({style:{fontSize:"13px",color:"#6b7280",fontWeight:"600"}},["KELİMELER ("+createWords.length+")"]),
+      div({style:{display:"flex",gap:"8px",margin:"8px 0 12px"}},[
+        wInp,
+        btn({style:{padding:"10px 16px",borderRadius:"10px",background:"#4f46e5",border:"none",color:"#fff",fontWeight:"700"},onClick:()=>{const w=S.wordInput.trim();if(w&&!S.createWords.includes(w))set(s=>({createWords:[...s.createWords,w],wordInput:""}));else set({wordInput:""});}},[" Ekle"])
+      ]),
+      div({style:{display:"flex",flexWrap:"wrap",gap:"8px",minHeight:"40px",marginBottom:"28px"}},chips.length?chips:[span({style:{color:"#d1d5db",fontSize:"14px"}},["Henüz kelime yok..."])]),
+      btn({style:{width:"100%",padding:"15px 0",borderRadius:"14px",background:canSave?"#4f46e5":"#e5e7eb",border:"none",color:canSave?"#fff":"#9ca3af",fontSize:"16px",fontWeight:"700"},onClick:saveGame},["💾 Kaydet"])
+    ])
+  ]);
+}
+
+function renderMenu(){
+  const{selectedCat,selectedTimer,created,confirmDelete}=S;
+  const ac=allCats();
+  const createdKeys=Object.keys(created);
+
+  const timerBtns=TIMERS.map(t=>btn({
+    style:{flex:"1",padding:"10px 0",borderRadius:"12px",border:selectedTimer===t?"2px solid #818cf8":"2px solid transparent",background:selectedTimer===t?"#4f46e5":"rgba(255,255,255,.13)",color:"#fff",fontSize:"16px",fontWeight:"700"},
+    onClick:()=>set({selectedTimer:t})
+  },[t+"s"]));
+
+  const defBtns=Object.keys(DEFAULT_CATEGORIES).map(cat=>{
+    const ri=remainingInfo(cat,ac);
+    return btn({
+      style:{padding:"16px 20px",borderRadius:"16px",background:selectedCat===cat?"#4f46e5":"rgba(255,255,255,.11)",border:selectedCat===cat?"2px solid #818cf8":"2px solid transparent",color:"#fff",fontSize:"15px",fontWeight:"600",textAlign:"left",width:"100%",display:"flex",justifyContent:"space-between",alignItems:"center"},
+      onClick:()=>set({selectedCat:cat})
+    },[span({},[cat]),span({style:{fontSize:"11px",color:ri.color}},[ri.text])]);
+  });
+
+  const createdBtns=createdKeys.map(cat=>{
+    const ri=remainingInfo(cat,ac);
+    return div({style:{borderRadius:"16px",overflow:"hidden",border:selectedCat===cat?"2px solid #4ade80":"2px solid transparent"}},[
+      btn({style:{width:"100%",padding:"16px 20px",background:selectedCat===cat?"#16a34a":"rgba(255,255,255,.11)",border:"none",color:"#fff",fontSize:"15px",fontWeight:"600",textAlign:"left",display:"flex",justifyContent:"space-between",alignItems:"center"},onClick:()=>set({selectedCat:cat})},[
+        span({},[cat]),span({style:{fontSize:"11px",color:ri.color}},[ri.text])
+      ]),
+      div({style:{display:"flex",background:"rgba(255,255,255,.06)"}},[
+        btn({style:{flex:"1",padding:"9px 0",background:"none",border:"none",borderRight:"1px solid rgba(255,255,255,.1)",color:"#a5b4fc",fontSize:"13px",fontWeight:"600"},onClick:()=>{set({editKey:cat,createCat:cat,createWords:[...created[cat]],wordInput:"",screen:"create"});}},["✏️ Düzenle"]),
+        btn({style:{flex:"1",padding:"9px 0",background:"none",border:"none",color:"#fca5a5",fontSize:"13px",fontWeight:"600"},onClick:()=>set({confirmDelete:cat})},["🗑 Sil"])
+      ])
+    ]);
+  });
+
+  const menuEl=div({style:{minHeight:"100vh",background:"linear-gradient(160deg,#1e1b4b 0%,#312e81 60%,#4f46e5 100%)",padding:"env(safe-area-inset-top,32px) 16px 32px"}},[
+    div({style:{maxWidth:"420px",margin:"0 auto"}},[
+      div({style:{textAlign:"center",marginBottom:"28px"}},[
+        div({style:{fontSize:"48px"}},["🎯"]),
+        div({style:{fontSize:"32px",fontWeight:"900",color:"#fff",margin:"8px 0 4px"}},["Heads Up!"]),
+        div({style:{color:"#a5b4fc",fontSize:"15px"}},["Telefonu alnına tut!"])
+      ]),
+      div({style:{background:"rgba(255,255,255,.11)",borderRadius:"18px",padding:"16px 20px",marginBottom:"20px"}},[
+        div({style:{color:"#c7d2fe",fontSize:"12px",fontWeight:"700",letterSpacing:"1.5px",marginBottom:"10px"}},["⏱ SÜRE"]),
+        div({style:{display:"flex",gap:"10px"}},timerBtns)
+      ]),
+      div({style:{color:"#c7d2fe",fontSize:"12px",fontWeight:"700",letterSpacing:"1.5px",marginBottom:"10px"}},["📂 KATEGORİLER"]),
+      div({style:{display:"flex",flexDirection:"column",gap:"10px",marginBottom:"20px"}},defBtns),
+      ...(createdKeys.length?[
+        div({style:{color:"#86efac",fontSize:"12px",fontWeight:"700",letterSpacing:"1.5px",marginBottom:"10px"}},["🛠 OLUŞTURULAN OYUNLAR"]),
+        div({style:{display:"flex",flexDirection:"column",gap:"10px",marginBottom:"20px"}},createdBtns)
+      ]:[]),
+      btn({
+        style:{width:"100%",padding:"18px 0",borderRadius:"18px",background:selectedCat?"#818cf8":"rgba(255,255,255,.13)",border:"none",color:selectedCat?"#fff":"rgba(255,255,255,.35)",fontSize:"18px",fontWeight:"800",marginBottom:"12px"},
+        onClick:startGame
+      },[selectedCat?"▶ Başla — "+selectedCat:"Önce kategori seç"]),
+      btn({style:{width:"100%",padding:"15px 0",borderRadius:"18px",background:"rgba(255,255,255,.11)",border:"2px solid rgba(255,255,255,.2)",color:"#fff",fontSize:"16px",fontWeight:"700"},onClick:()=>set({editKey:null,createCat:"",createWords:[],wordInput:"",screen:"create"})},["✏️ Oyun Oluştur"])
+    ])
+  ]);
+
+  if(confirmDelete){
+    menuEl.appendChild(div({style:{position:"fixed",inset:"0",background:"rgba(0,0,0,.65)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:"99",padding:"24px"}},[
+      div({style:{background:"#fff",borderRadius:"24px",padding:"32px 24px",maxWidth:"320px",width:"100%",textAlign:"center"}},[
+        div({style:{fontSize:"36px",marginBottom:"12px"}},["🗑"]),
+        div({style:{fontSize:"20px",fontWeight:"800",color:"#1e1b4b",marginBottom:"8px"}},["\""+confirmDelete+"\" silinsin mi?"]),
+        div({style:{color:"#6b7280",fontSize:"14px",marginBottom:"24px"}},["Bu işlem geri alınamaz."]),
+        div({style:{display:"flex",gap:"10px"}},[
+          btn({style:{flex:"1",padding:"12px 0",borderRadius:"12px",background:"#f3f4f6",border:"none",color:"#374151",fontSize:"15px",fontWeight:"600"},onClick:()=>set({confirmDelete:null})},["İptal"]),
+          btn({style:{flex:"1",padding:"12px 0",borderRadius:"12px",background:"#ef4444",border:"none",color:"#fff",fontSize:"15px",fontWeight:"700"},onClick:()=>deleteGame(confirmDelete)},["Sil"])
+        ])
+      ])
+    ]));
+  }
+  return menuEl;
+}
+
+// ── Main render ──────────────────────────────────────────
+function render(){
+  const app=document.getElementById("app");
+  app.innerHTML="";
+  if(S.screen==="playing")app.appendChild(renderPlaying());
+  else if(S.screen==="result")app.appendChild(renderResult());
+  else if(S.screen==="create")app.appendChild(renderCreate());
+  else app.appendChild(renderMenu());
+}
+
+render();
+</script>
+</body>
+</html>
