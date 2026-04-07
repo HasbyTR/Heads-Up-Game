@@ -1,27 +1,5 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="Heads Up!"/>
-<title>Heads Up!</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#1e1b4b;min-height:100vh;overflow-x:hidden;}
-button{cursor:pointer;font-family:inherit;-webkit-appearance:none;}
-input{font-family:inherit;-webkit-appearance:none;}
-::-webkit-scrollbar{width:4px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:#ffffff44;border-radius:99px;}
-@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.12);opacity:.85}}
-@keyframes fadeIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
-</style>
-</head>
-<body>
-<div id="app"></div>
-<script>
+import { useState, useEffect, useRef, useCallback } from "react";
+
 const DEFAULT_CATEGORIES = {
   "🎬 Film & Dizi": [
     "Yeşilçam","Recep İvedik","Kurtlar Vadisi","Diriliş Ertuğrul","Çukur","Ezel","Deli Yürek",
@@ -71,11 +49,9 @@ const DEFAULT_CATEGORIES = {
     "Burak Yılmaz","Volkan Demirel","Selçuk İnan","Umut Bulut","Semih Şentürk",
     "Dünya Kupası 2002","Euro 2008","Türkiye Kupası","Süper Lig",
     "Olimpiyat","Basketbol","Voleybol","Güreş","Tekvando","Atletizm","Yüzme",
-    "Naim Süleymanoğlu","Halil Mutlu","Taner Sağır",
-    "Şampiyonlar Ligi","UEFA Kupası","Penaltı","Sarı Kart",
-    "Kırmızı Kart","Ofsayt","Köşe Vuruşu","VAR Sistemi",
-    "Taraftar","Transfer","Milli Takım","Paralimpik",
-    "Formula 1","Tenis","Golf","Satranç","Bowling",
+    "Naim Süleymanoğlu","Halil Mutlu","Taner Sağır","Şampiyonlar Ligi","UEFA Kupası",
+    "Penaltı","Sarı Kart","Kırmızı Kart","Ofsayt","Köşe Vuruşu","VAR Sistemi",
+    "Taraftar","Transfer","Milli Takım","Formula 1","Tenis","Golf","Satranç",
     "Kayak","Snowboard","Boks","Judo","Karate","Eskrim",
     "Cimbom","Sarı Lacivert","Kartal","Bordo Mavi",
     "Stat","Deplasman","Forma","Teknik Direktör","Kale","Dribling","Faul","Uzatma"
@@ -88,8 +64,8 @@ const DEFAULT_CATEGORIES = {
     "Boğaziçi","Galata Kulesi","Kız Kulesi","Rumeli Hisarı",
     "Fatih Sultan Mehmet","Kanuni Sultan Süleyman","Yavuz Sultan Selim","Abdülhamid",
     "Mevlana","Yunus Emre","Hacı Bektaş Veli","Nasreddin Hoca","Dede Korkut",
-    "Karagöz-Hacivat","Ortaoyunu","Halk Dansları","Zeybek",
-    "Halay","Horon","Karşılama","Sema","Mevlevi","Bektaşi","Alevi",
+    "Karagöz-Hacivat","Ortaoyunu","Halk Dansları","Zeybek","Halay","Horon",
+    "Karşılama","Sema","Mevlevi","Bektaşi","Alevi",
     "Ramazan","Kurban Bayramı","Nevruz","Hıdırellez","Kırkpınar","Yağlı Güreş",
     "Türk Kahvesi","Çay","Nargile","Rakı","Meze","Sünnet Düğünü","Kına Gecesi",
     "Nazar Boncuğu","Türk Hamamı","Çini Sanatı","Hat Sanatı","Ebru",
@@ -108,12 +84,11 @@ const DEFAULT_CATEGORIES = {
     "Baklava","Kadayıf","Künefe","Tulumba","Lokma","Revani","Şekerpare","Helva",
     "Aşure","Keşkül","Sütlaç","Muhallebi","Dondurma","Lokum","Akide Şekeri",
     "Çay","Türk Kahvesi","Salep","Boza","Ayran","Şalgam","Limonata","Vişne Suyu",
-    "Rakı","Pastırma","Sucuk","Kaşar","Beyaz Peynir",
-    "Tulum Peyniri","Van Otlu Peyniri","Çerkez Tavuğu","Cacık","Haydari",
+    "Rakı","Pastırma","Sucuk","Kaşar","Beyaz Peynir","Tulum Peyniri",
+    "Van Otlu Peyniri","Çerkez Tavuğu","Cacık","Haydari",
     "Patlıcan Ezmesi","Acılı Ezme","Hummus","Tahin","Pekmez","Reçel","Kaymak",
-    "Adana Kebabı","Urfa Kebabı","İskender","Çiğ Köfte",
-    "Tantuni","Kumpir","Balık Sandviç","Ciğer Sarma","Kuzu Tandır",
-    "Fırın Sütlaç","Kazandibi","Kemalpaşa Tatlısı","Tahin Helvası"
+    "Adana Kebabı","Urfa Kebabı","İskender","Çiğ Köfte","Tantuni","Kumpir",
+    "Balık Sandviç","Ciğer Sarma","Kuzu Tandır","Fırın Sütlaç","Kazandibi","Tahin Helvası"
   ],
   "🌍 Türkiye Coğrafyası": [
     "İstanbul","Ankara","İzmir","Bursa","Antalya","Adana","Konya","Gaziantep",
@@ -132,387 +107,469 @@ const DEFAULT_CATEGORIES = {
     "Çanakkale Boğazı","İstanbul Boğazı","Marmara",
     "Edirne","Kırklareli","Tekirdağ","Balıkesir","Muğla",
     "Bursa Ovası","Çukurova","Konya Ovası","Harran Ovası","Gediz Ovası"
-  ]
+  ],
 };
 
-const TIMERS=[30,60,90];
-const REFILL=10;
-const COUNTDOWN_FROM=5;
+const TIMERS = [30, 60, 90];
+const REFILL_THRESHOLD = 10;
+const COUNTDOWN_FROM = 5;
 
-function shuffle(a){return[...a].sort(()=>Math.random()-.5);}
-function todayKey(){const d=new Date();return`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;}
-function getUsed(cat){try{const r=localStorage.getItem(`hu_used_${cat}_${todayKey()}`);return r?JSON.parse(r):[];}catch{return[];}}
-function addUsed(cat,words){try{const e=getUsed(cat);localStorage.setItem(`hu_used_${cat}_${todayKey()}`,JSON.stringify([...new Set([...e,...words])]));}catch{}}
-function loadCreated(){try{const s=localStorage.getItem("headsup_created");return s?JSON.parse(s):{};}catch{return{};}}
-function saveCreatedLS(o){try{localStorage.setItem("headsup_created",JSON.stringify(o));}catch{}}
-function buildDeck(cat,all){const a=all[cat]||[];const u=getUsed(cat);let av=a.filter(w=>!u.includes(w));if(av.length<=REFILL){av=[...a];localStorage.removeItem(`hu_used_${cat}_${todayKey()}`);}return shuffle(av);}
-function remInfo(cat,all){const a=all[cat]||[];const r=a.filter(w=>!getUsed(cat).includes(w)).length;if(r<=REFILL)return{text:"🔄 Sıfırlandı",color:"#fbbf24"};return{text:`${r}/${a.length} kelime`,color:"#a5b4fc"};}
-function isLand(g){return g!==null&&(g>60||g<-60);}
-
-// ── State ─────────────────────────────────────────────────
-let S={
-  screen:"menu", // menu|countdown|playing|paused|result|create
-  created:loadCreated(),
-  selCat:null, selTimer:60,
-  editKey:null, createCat:"", createWords:[], wordInput:"",
-  confirmDelete:null,
-  deck:[], cardIdx:0, timeLeft:0, correct:0, passed:0, flash:null,
-  roundResults:[], countdown:COUNTDOWN_FROM,
-  landscape:false,
-  timerIv:null, countdownIv:null, flashT:null,
-};
-function allCats(){return{...DEFAULT_CATEGORIES,...S.created};}
-function set(patch){
-  const p=typeof patch==="function"?patch(S):patch;
-  Object.assign(S,p);
-  render();
+function shuffle(a) { return [...a].sort(() => Math.random() - 0.5); }
+function todayKey() { const d = new Date(); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; }
+function getUsed(cat) { try { const r = localStorage.getItem(`hu_used_${cat}_${todayKey()}`); return r ? JSON.parse(r) : []; } catch { return []; } }
+function addUsed(cat, words) { try { const e = getUsed(cat); localStorage.setItem(`hu_used_${cat}_${todayKey()}`, JSON.stringify([...new Set([...e, ...words])])); } catch {} }
+function loadCreated() { try { const s = localStorage.getItem("headsup_created"); return s ? JSON.parse(s) : {}; } catch { return {}; } }
+function saveCreatedLS(o) { try { localStorage.setItem("headsup_created", JSON.stringify(o)); } catch {} }
+function buildDeck(cat, allCats) {
+  const all = allCats[cat] || [];
+  const used = getUsed(cat);
+  let avail = all.filter(w => !used.includes(w));
+  if (avail.length <= REFILL_THRESHOLD) { avail = [...all]; localStorage.removeItem(`hu_used_${cat}_${todayKey()}`); }
+  return shuffle(avail);
 }
-
-// ── Orientation ───────────────────────────────────────────
-let tiltLocked=false;
-function onOrient(e){
-  const g=e.gamma;
-  const land=isLand(g);
-  const prev=S.landscape;
-  S.landscape=land;
-
-  if(S.screen==="playing"&&!land){
-    clearInterval(S.timerIv);
-    set({screen:"paused",landscape:land});
-    return;
-  }
-  if(S.screen==="paused"&&land){
-    set({screen:"playing",landscape:land});
-    return;
-  }
-  if(S.screen==="playing"&&land&&!tiltLocked){
-    let doC=false,doP=false;
-    if(g>0){if(g>75)doC=true;else if(g<72&&g>62)doP=true;}
-    else{if(g<-75)doC=true;else if(g>-72&&g<-62)doP=true;}
-    if(doC){tiltLocked=true;doCorrect();setTimeout(()=>{tiltLocked=false;},1200);}
-    else if(doP){tiltLocked=true;doPass();setTimeout(()=>{tiltLocked=false;},1200);}
-  }
-  if(prev!==land)set({landscape:land});
+function remainingInfo(cat, allCats) {
+  const all = allCats[cat] || [];
+  const rem = all.filter(w => !getUsed(cat).includes(w)).length;
+  if (rem <= REFILL_THRESHOLD) return { text: "🔄 Sıfırlandı", color: "#fbbf24" };
+  return { text: `${rem}/${all.length} kelime`, color: "#a5b4fc" };
 }
+// gamma > 60 veya < -60 → landscape (yan)
+function checkLandscape(gamma) { return gamma !== null && Math.abs(gamma) > 60; }
 
-function initOrient(){
-  if(typeof DeviceOrientationEvent!=="undefined"&&typeof DeviceOrientationEvent.requestPermission==="function"){
-    DeviceOrientationEvent.requestPermission().then(r=>{
-      if(r==="granted")window.addEventListener("deviceorientation",onOrient,true);
-      startCountdown();
-    }).catch(()=>startCountdown());
-  } else {
-    window.addEventListener("deviceorientation",onOrient,true);
-    startCountdown();
+// ── SCREENS ──────────────────────────────────────────────
+// menu → waitLandscape (dik başladıysa) → countdown → playing → paused → playing → result
+// menu → countdown (zaten yan tutuyorsa) → playing → ...
+
+export default function App() {
+  const [screen, setScreen] = useState("menu");
+  const [created, setCreated] = useState(loadCreated);
+  const [selectedCat, setSelectedCat] = useState(null);
+  const [selectedTimer, setSelectedTimer] = useState(60);
+  const [editKey, setEditKey] = useState(null);
+  const [createCat, setCreateCat] = useState("");
+  const [createWords, setCreateWords] = useState([]);
+  const [wordInput, setWordInput] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [deck, setDeck] = useState([]);
+  const [cardIdx, setCardIdx] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [correct, setCorrect] = useState(0);
+  const [passed, setPassed] = useState(0);
+  const [flash, setFlash] = useState(null);
+  const [roundResults, setRoundResults] = useState([]);
+  const [countdown, setCountdown] = useState(COUNTDOWN_FROM);
+  const [gamma, setGamma] = useState(null); // live gamma value
+
+  const timerRef = useRef(null);
+  const countdownRef = useRef(null);
+  const tiltLocked = useRef(false);
+  const flashRef = useRef(null);
+
+  // Refs so callbacks always see latest values
+  const screenRef = useRef(screen);
+  const deckRef = useRef(deck);
+  const cardIdxRef = useRef(cardIdx);
+  const selectedCatRef = useRef(selectedCat);
+  const gammaRef = useRef(gamma);
+  screenRef.current = screen;
+  deckRef.current = deck;
+  cardIdxRef.current = cardIdx;
+  selectedCatRef.current = selectedCat;
+  gammaRef.current = gamma;
+
+  const allCats = { ...DEFAULT_CATEGORIES, ...created };
+  const isLandscape = checkLandscape(gamma);
+
+  // ── Orientation listener ─────────────────────────────
+  const doCorrectRef = useRef(null);
+  const doPassRef = useRef(null);
+  const beginCountdownRef = useRef(null);
+  const orientRegistered = useRef(false);
+
+  function handleOrientation(e) {
+    const g = e.gamma;
+    setGamma(g);
+    const land = checkLandscape(g);
+    const scr = screenRef.current;
+
+    if (scr === "waitLandscape" && land) {
+      beginCountdownRef.current?.();
+      return;
+    }
+    if (scr === "playing" && !land) {
+      clearInterval(timerRef.current);
+      setScreen("paused");
+      return;
+    }
+    if (scr === "paused" && land) {
+      setScreen("playing");
+      return;
+    }
+    if (scr === "playing" && land && !tiltLocked.current && g !== null) {
+      let doC = false, doP = false;
+      if (g > 0) { if (g > 75) doC = true; else if (g >= 62 && g <= 72) doP = true; }
+      else { if (g < -75) doC = true; else if (g <= -62 && g >= -72) doP = true; }
+      if (doC) { tiltLocked.current = true; doCorrectRef.current?.(); setTimeout(() => { tiltLocked.current = false; }, 1200); }
+      else if (doP) { tiltLocked.current = true; doPassRef.current?.(); setTimeout(() => { tiltLocked.current = false; }, 1200); }
+    }
   }
-}
 
-// ── Timer ─────────────────────────────────────────────────
-function startGameTimer(){
-  clearInterval(S.timerIv);
-  const iv=setInterval(()=>{
-    if(S.screen!=="playing"){clearInterval(iv);return;}
-    set(s=>{
-      if(s.timeLeft<=1){clearInterval(iv);return{timeLeft:0,screen:"result",timerIv:null};}
-      return{timeLeft:s.timeLeft-1};
+  const handleOrientationRef = useRef(handleOrientation);
+  handleOrientationRef.current = handleOrientation;
+
+  function registerOrient() {
+    if (orientRegistered.current) return;
+    orientRegistered.current = true;
+    window.addEventListener("deviceorientation", (e) => handleOrientationRef.current(e), true);
+  }
+
+  useEffect(() => {
+    if (typeof DeviceOrientationEvent === "undefined" || typeof DeviceOrientationEvent.requestPermission !== "function") {
+      registerOrient();
+    }
+  }, []);
+
+  // playing screen: restart timer after resume from paused
+  useEffect(() => {
+    if (screen === "playing") {
+      timerRef.current = setInterval(() => {
+        setTimeLeft(t => {
+          if (t <= 1) { clearInterval(timerRef.current); return 0; }
+          return t - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timerRef.current);
+    }
+  }, [screen]);
+
+  // time's up
+  useEffect(() => {
+    if (screen === "playing" && timeLeft === 0 && deck.length > 0) {
+      const t = setTimeout(() => { clearInterval(timerRef.current); setScreen("result"); }, 400);
+      return () => clearTimeout(t);
+    }
+  }, [timeLeft, screen]);
+
+  // keyboard for desktop testing
+  useEffect(() => {
+    const h = e => {
+      if (screenRef.current !== "playing") return;
+      if (e.key === "ArrowUp") doCorrectRef.current?.();
+      if (e.key === "ArrowDown") doPassRef.current?.();
+    };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, []);
+
+  // ── Actions ──────────────────────────────────────────
+  function triggerFlash(type) {
+    setFlash(type);
+    clearTimeout(flashRef.current);
+    flashRef.current = setTimeout(() => setFlash(null), 600);
+  }
+
+  const doCorrect = useCallback(() => {
+    const word = deckRef.current[cardIdxRef.current];
+    if (word) { setCorrect(c => c + 1); setRoundResults(r => [...r, { word, result: "correct" }]); addUsed(selectedCatRef.current, [word]); }
+    triggerFlash("correct");
+    setCardIdx(i => i + 1);
+  }, []);
+
+  const doPass = useCallback(() => {
+    const word = deckRef.current[cardIdxRef.current];
+    if (word) { setPassed(p => p + 1); setRoundResults(r => [...r, { word, result: "pass" }]); }
+    triggerFlash("pass");
+    setCardIdx(i => i + 1);
+  }, []);
+
+  doCorrectRef.current = doCorrect;
+  doPassRef.current = doPass;
+
+  function beginCountdown() {
+    clearInterval(countdownRef.current);
+    setCountdown(COUNTDOWN_FROM);
+    setScreen("countdown");
+    let c = COUNTDOWN_FROM;
+    countdownRef.current = setInterval(() => {
+      c--;
+      if (c <= 0) { clearInterval(countdownRef.current); setScreen("playing"); }
+      else setCountdown(c);
+    }, 1000);
+  }
+  beginCountdownRef.current = beginCountdown;
+
+  function requestPermissionThen(cb) {
+    if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
+      DeviceOrientationEvent.requestPermission().then(r => {
+        if (r === "granted") registerOrient();
+        cb();
+      }).catch(() => cb());
+    } else { cb(); }
+  }
+
+  function startGame() {
+    if (!selectedCat) return;
+    const d = buildDeck(selectedCat, allCats);
+    setDeck(d);
+    setCardIdx(0); setCorrect(0); setPassed(0); setRoundResults([]);
+    setTimeLeft(selectedTimer); setFlash(null);
+
+    requestPermissionThen(() => {
+      // Check current orientation
+      if (checkLandscape(gammaRef.current)) {
+        beginCountdown(); // already landscape → straight to countdown
+      } else {
+        setScreen("waitLandscape"); // portrait → wait for landscape
+      }
     });
-  },1000);
-  set({timerIv:iv});
-}
-
-// Watch for playing screen start (after paused resume)
-let lastScreen="";
-function onScreenChange(scr){
-  if(scr==="playing"&&lastScreen!=="playing")startGameTimer();
-  lastScreen=scr;
-}
-
-// ── Countdown ─────────────────────────────────────────────
-function startCountdown(){
-  set({screen:"countdown",countdown:COUNTDOWN_FROM});
-  let c=COUNTDOWN_FROM;
-  const iv=setInterval(()=>{
-    c--;
-    if(c<=0){clearInterval(iv);set({screen:"playing",countdownIv:null});startGameTimer();}
-    else set({countdown:c});
-  },1000);
-  set({countdownIv:iv});
-}
-
-// ── Game Actions ──────────────────────────────────────────
-function doCorrect(){
-  const word=S.deck[S.cardIdx];
-  if(word){addUsed(S.selCat,[word]);set(s=>({correct:s.correct+1,roundResults:[...s.roundResults,{word,result:"correct"}],cardIdx:s.cardIdx+1}));}
-  else set(s=>({cardIdx:s.cardIdx+1}));
-  flash("correct");
-}
-function doPass(){
-  const word=S.deck[S.cardIdx];
-  if(word)set(s=>({passed:s.passed+1,roundResults:[...s.roundResults,{word,result:"pass"}],cardIdx:s.cardIdx+1}));
-  else set(s=>({cardIdx:s.cardIdx+1}));
-  flash("pass");
-}
-function flash(type){
-  clearTimeout(S.flashT);
-  const t=setTimeout(()=>set({flash:null}),600);
-  set({flash:type,flashT:t});
-}
-function startGame(){
-  if(!S.selCat)return;
-  const deck=buildDeck(S.selCat,allCats());
-  set({deck,cardIdx:0,correct:0,passed:0,roundResults:[],timeLeft:S.selTimer,flash:null});
-  initOrient();
-}
-function saveGame(){
-  const key=S.createCat.trim();if(!key||S.createWords.length===0)return;
-  const u={...S.created};if(S.editKey&&S.editKey!==key)delete u[S.editKey];
-  u[key]=S.createWords;saveCreatedLS(u);
-  set({created:u,screen:"menu",editKey:null,createCat:"",createWords:[],wordInput:""});
-}
-function deleteGame(key){
-  const u={...S.created};delete u[key];saveCreatedLS(u);
-  set({created:u,confirmDelete:null,selCat:S.selCat===key?null:S.selCat});
-}
-function addWord(){
-  const w=S.wordInput.trim();
-  if(w&&!S.createWords.includes(w))set(s=>({createWords:[...s.createWords,w],wordInput:""}));
-  else set({wordInput:""});
-}
-function removeWord(w){set(s=>({createWords:s.createWords.filter(x=>x!==w)}));}
-
-// ── DOM helpers ───────────────────────────────────────────
-function h(tag,attrs,children){
-  const e=document.createElement(tag);
-  for(const[k,v]of Object.entries(attrs||{})){
-    if(k==="style"&&typeof v==="object")Object.assign(e.style,v);
-    else if(k.startsWith("on"))e.addEventListener(k.slice(2).toLowerCase(),v);
-    else e.setAttribute(k,v);
   }
-  for(const c of(children||[])){
-    if(c==null)continue;
-    if(typeof c==="string"||typeof c==="number")e.appendChild(document.createTextNode(String(c)));
-    else if(c instanceof Node)e.appendChild(c);
+
+  function saveGame() {
+    const key = createCat.trim(); if (!key || createWords.length === 0) return;
+    const updated = { ...created };
+    if (editKey && editKey !== key) delete updated[editKey];
+    updated[key] = createWords;
+    setCreated(updated); saveCreatedLS(updated);
+    if (selectedCat === editKey) setSelectedCat(key);
+    setScreen("menu");
   }
-  return e;
-}
-const div=(a,c)=>h("div",a,c);
-const btn=(a,c)=>h("button",a,c);
-const inp=a=>h("input",a);
-const span=(a,c)=>h("span",a,c);
+  function deleteGame(key) {
+    const updated = { ...created }; delete updated[key]; saveCreatedLS(updated);
+    setCreated(updated); if (selectedCat === key) setSelectedCat(null); setConfirmDelete(null);
+  }
+  function openEdit(key) { setEditKey(key); setCreateCat(key); setCreateWords([...created[key]]); setWordInput(""); setScreen("create"); }
+  function openCreate() { setEditKey(null); setCreateCat(""); setCreateWords([]); setWordInput(""); setScreen("create"); }
+  function addWord() { const w = wordInput.trim(); if (w && !createWords.includes(w)) setCreateWords(ws => [...ws, w]); setWordInput(""); }
+  function removeWord(w) { setCreateWords(ws => ws.filter(x => x !== w)); }
 
-// ── Screens ───────────────────────────────────────────────
-function renderCountdown(){
-  return div({style:{minHeight:"100vh",background:"linear-gradient(135deg,#1e1b4b,#312e81)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",userSelect:"none"}},[
-    div({style:{textAlign:"center"}},[
-      div({style:{fontSize:"18px",color:"#a5b4fc",fontWeight:"700",marginBottom:"24px",letterSpacing:"3px"}},["HAZIR OLUN!"]),
-      div({style:{fontSize:"120px",fontWeight:"900",color:"#fff",lineHeight:"1",textShadow:"0 4px 32px rgba(0,0,0,.5)",animation:"pulse 1s ease-in-out infinite"}},[ S.countdown]),
-      div({style:{fontSize:"15px",color:"#a5b4fc",marginTop:"32px"}},[S.selCat])
-    ])
-  ]);
-}
+  const timerPct = (timeLeft / selectedTimer) * 100;
+  const timerColor = timeLeft <= 10 ? "#ef4444" : timeLeft <= 20 ? "#f97316" : "#22c55e";
+  const currentWord = deck[cardIdx] || null;
 
-function renderPaused(){
-  const tc=S.timeLeft<=10?"#ef4444":S.timeLeft<=20?"#f97316":"#22c55e";
-  return div({style:{minHeight:"100vh",background:"#0f172a",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",userSelect:"none"}},[
-    div({style:{textAlign:"center"}},[
-      div({style:{fontSize:"64px",marginBottom:"16px"}},["⏸"]),
-      div({style:{fontSize:"28px",fontWeight:"900",color:"#fff",marginBottom:"12px"}},["Duraklatıldı"]),
-      div({style:{fontSize:"15px",color:"#94a3b8",marginBottom:"8px"}},["Telefonu yan çevir → devam eder"]),
-      div({style:{fontSize:"13px",color:"#475569",marginTop:"24px"}},["Kalan süre: ",span({style:{color:tc,fontWeight:"700"}},[S.timeLeft+"s"])])
-    ])
-  ]);
-}
+  const fullBg = { minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", userSelect: "none", padding: "24px 16px" };
 
-function renderPlaying(){
-  const{correct,passed,timeLeft,selTimer,flash:fl,selCat,deck,cardIdx}=S;
-  const bg=fl==="correct"?"#16a34a":fl==="pass"?"#dc2626":"#1e1b4b";
-  const pct=(timeLeft/selTimer)*100;
-  const tc=timeLeft<=10?"#ef4444":timeLeft<=20?"#f97316":"#22c55e";
-  const word=deck[cardIdx]||null;
-  return div({style:{minHeight:"100vh",background:bg,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"space-between",padding:"env(safe-area-inset-top,24px) 16px 28px",transition:"background .3s",userSelect:"none"}},[
-    div({style:{width:"100%",maxWidth:"400px"}},[
-      div({style:{display:"flex",justifyContent:"space-between",color:"#fff",marginBottom:"6px",fontSize:"14px"}},[
-        span({},["✅ "+correct]),
-        span({style:{fontSize:"22px",fontWeight:"700",color:tc}},[timeLeft+"s"]),
-        span({},["⏭ "+passed])
-      ]),
-      div({style:{background:"#ffffff33",borderRadius:"99px",height:"8px",overflow:"hidden"}},[
-        div({style:{height:"100%",width:pct+"%",background:tc,borderRadius:"99px",transition:"width 1s linear"}},[])
-      ])
-    ]),
-    div({style:{flex:"1",display:"flex",alignItems:"center",justifyContent:"center",width:"100%",maxWidth:"400px"}},[
-      div({style:{background:"#fff",borderRadius:"24px",padding:"40px 24px",textAlign:"center",width:"100%",boxShadow:"0 8px 32px rgba(0,0,0,.25)",animation:"fadeIn .25s ease"}},[
-        div({style:{fontSize:"11px",color:"#6b7280",marginBottom:"8px",letterSpacing:"2px",textTransform:"uppercase"}},[selCat]),
-        word
-          ? div({style:{fontSize:"34px",fontWeight:"800",color:"#1e1b4b",lineHeight:"1.2",minHeight:"80px",display:"flex",alignItems:"center",justifyContent:"center"}},[word])
-          : div({style:{fontSize:"26px",fontWeight:"800",color:"#6b7280",minHeight:"80px",display:"flex",alignItems:"center",justifyContent:"center"}},["🎉 Kartlar bitti!"])
-      ])
-    ]),
-    div({style:{width:"100%",maxWidth:"400px"}},[
-      div({style:{color:"#ffffffaa",textAlign:"center",fontSize:"12px",marginBottom:"10px"}},["Ekran YUKARI → ✅ Doğru  ·  Ekran AŞAĞI → ⏭ Pas"]),
-      div({style:{display:"flex",gap:"12px"}},[
-        btn({style:{flex:"1",padding:"20px 0",borderRadius:"16px",background:"#ef4444",border:"none",color:"#fff",fontSize:"18px",fontWeight:"700"},onClick:doPass},["⬇ Pas"]),
-        btn({style:{flex:"1",padding:"20px 0",borderRadius:"16px",background:"#22c55e",border:"none",color:"#fff",fontSize:"18px",fontWeight:"700"},onClick:doCorrect},["⬆ Doğru"])
-      ])
-    ])
-  ]);
-}
+  // ── WAIT LANDSCAPE ───────────────────────────────────
+  if (screen === "waitLandscape") {
+    return (
+      <div style={{ ...fullBg, background: "linear-gradient(135deg,#1e1b4b,#312e81)" }}>
+        <div style={{ textAlign: "center", maxWidth: 340 }}>
+          <div style={{ fontSize: 72, marginBottom: 20 }}>📱</div>
+          <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", marginBottom: 12 }}>Telefonu yan çevirin</div>
+          <div style={{ fontSize: 15, color: "#a5b4fc", marginBottom: 6 }}>ve alnınıza dayayın</div>
+          <div style={{ fontSize: 13, color: "#6b7280", marginTop: 24 }}>{selectedCat}</div>
+        </div>
+      </div>
+    );
+  }
 
-function renderResult(){
-  const{correct,passed,selCat,roundResults}=S;
-  const items=roundResults.map(r=>
-    div({style:{display:"flex",alignItems:"center",justifyContent:"space-between",background:r.result==="correct"?"#f0fdf4":"#fef2f2",borderRadius:"10px",padding:"8px 14px"}},[
-      span({style:{fontWeight:"600",color:"#1e1b4b",fontSize:"15px"}},[r.word]),
-      span({style:{fontSize:"18px"}},[r.result==="correct"?"✅":"⏭"])
-    ])
+  // ── COUNTDOWN ────────────────────────────────────────
+  if (screen === "countdown") {
+    return (
+      <div style={{ ...fullBg, background: "linear-gradient(135deg,#1e1b4b,#312e81)" }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 18, color: "#a5b4fc", fontWeight: 700, marginBottom: 8, letterSpacing: 2 }}>TELEFONUNUZU ALNINIZIA DAYAYIN</div>
+          <div style={{ fontSize: 16, color: "#818cf8", marginBottom: 28 }}>Hazır olun!</div>
+          <div style={{ fontSize: 120, fontWeight: 900, color: "#fff", lineHeight: 1, textShadow: "0 4px 32px #0008",
+            animation: "pulse 1s ease-in-out infinite" }}>{countdown}</div>
+          <div style={{ fontSize: 15, color: "#a5b4fc", marginTop: 32 }}>{selectedCat}</div>
+        </div>
+        <style>{`@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}`}</style>
+      </div>
+    );
+  }
+
+  // ── PAUSED ───────────────────────────────────────────
+  if (screen === "paused") {
+    return (
+      <div style={{ ...fullBg, background: "#0f172a" }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 64, marginBottom: 16 }}>⏸</div>
+          <div style={{ fontSize: 26, fontWeight: 900, color: "#fff", marginBottom: 10 }}>Duraklatıldı</div>
+          <div style={{ fontSize: 15, color: "#94a3b8" }}>Telefonu yan çevir → devam eder</div>
+          <div style={{ fontSize: 13, color: "#475569", marginTop: 24 }}>
+            Kalan: <span style={{ color: timerColor, fontWeight: 700 }}>{timeLeft}s</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── PLAYING ──────────────────────────────────────────
+  if (screen === "playing") {
+    const bg = flash === "correct" ? "#16a34a" : flash === "pass" ? "#dc2626" : "#1e1b4b";
+    return (
+      <div style={{ minHeight: "100vh", background: bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "space-between", padding: "24px 16px", transition: "background 0.3s", userSelect: "none" }}>
+        <div style={{ width: "100%", maxWidth: 400 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", color: "#fff", marginBottom: 6, fontSize: 14 }}>
+            <span>✅ {correct}</span>
+            <span style={{ fontSize: 22, fontWeight: 700, color: timerColor }}>{timeLeft}s</span>
+            <span>⏭ {passed}</span>
+          </div>
+          <div style={{ background: "#ffffff33", borderRadius: 99, height: 8, overflow: "hidden" }}>
+            <div style={{ height: "100%", width: `${timerPct}%`, background: timerColor, borderRadius: 99, transition: "width 1s linear" }} />
+          </div>
+        </div>
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", width: "100%", maxWidth: 400 }}>
+          <div style={{ background: "#fff", borderRadius: 24, padding: "40px 24px", textAlign: "center", width: "100%", boxShadow: "0 8px 32px #0004" }}>
+            <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 8, letterSpacing: 2, textTransform: "uppercase" }}>{selectedCat}</div>
+            {currentWord
+              ? <div style={{ fontSize: 36, fontWeight: 800, color: "#1e1b4b", lineHeight: 1.2, minHeight: 80, display: "flex", alignItems: "center", justifyContent: "center" }}>{currentWord}</div>
+              : <div style={{ fontSize: 26, fontWeight: 800, color: "#6b7280", minHeight: 80, display: "flex", alignItems: "center", justifyContent: "center" }}>🎉 Kartlar bitti!</div>
+            }
+          </div>
+        </div>
+        <div style={{ width: "100%", maxWidth: 400 }}>
+          <p style={{ color: "#ffffffaa", textAlign: "center", fontSize: 12, marginBottom: 10 }}>
+            Ekran YUKARI → ✅ Doğru &nbsp;·&nbsp; Ekran AŞAĞI → ⏭ Pas<br />
+            <span style={{ fontSize: 11 }}>(Klavye: ↑ doğru · ↓ pas)</span>
+          </p>
+          <div style={{ display: "flex", gap: 12 }}>
+            <button onClick={doPass} style={{ flex: 1, padding: "20px 0", borderRadius: 16, background: "#ef4444", border: "none", color: "#fff", fontSize: 18, fontWeight: 700 }}>⬇ Pas</button>
+            <button onClick={doCorrect} style={{ flex: 1, padding: "20px 0", borderRadius: 16, background: "#22c55e", border: "none", color: "#fff", fontSize: 18, fontWeight: 700 }}>⬆ Doğru</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── RESULT ───────────────────────────────────────────
+  if (screen === "result") {
+    return (
+      <div style={{ minHeight: "100vh", background: "linear-gradient(135deg,#1e1b4b,#312e81)", padding: "32px 16px", overflowY: "auto" }}>
+        <div style={{ maxWidth: 420, margin: "0 auto" }}>
+          <div style={{ background: "#fff", borderRadius: 28, padding: "32px 24px", boxShadow: "0 8px 40px #0006" }}>
+            <div style={{ textAlign: "center", marginBottom: 20 }}>
+              <div style={{ fontSize: 48 }}>🎉</div>
+              <h2 style={{ fontSize: 26, fontWeight: 800, color: "#1e1b4b", margin: "8px 0 2px" }}>Süre Doldu!</h2>
+              <p style={{ color: "#6b7280" }}>{selectedCat}</p>
+            </div>
+            <div style={{ display: "flex", gap: 12, justifyContent: "center", marginBottom: 20 }}>
+              <div style={{ background: "#f0fdf4", borderRadius: 16, padding: "16px 28px", textAlign: "center" }}>
+                <div style={{ fontSize: 36, fontWeight: 800, color: "#16a34a" }}>{correct}</div>
+                <div style={{ fontSize: 13, color: "#16a34a" }}>Doğru</div>
+              </div>
+              <div style={{ background: "#fef2f2", borderRadius: 16, padding: "16px 28px", textAlign: "center" }}>
+                <div style={{ fontSize: 36, fontWeight: 800, color: "#dc2626" }}>{passed}</div>
+                <div style={{ fontSize: 13, color: "#dc2626" }}>Pas</div>
+              </div>
+            </div>
+            {roundResults.length > 0 && (
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#6b7280", letterSpacing: 1.5, marginBottom: 10 }}>BU TURDAKİ KELİMELER</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  {roundResults.map((r, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: r.result === "correct" ? "#f0fdf4" : "#fef2f2", borderRadius: 10, padding: "8px 14px" }}>
+                      <span style={{ fontWeight: 600, color: "#1e1b4b", fontSize: 15 }}>{r.word}</span>
+                      <span style={{ fontSize: 18 }}>{r.result === "correct" ? "✅" : "⏭"}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            <button onClick={startGame} style={{ width: "100%", padding: "14px 0", borderRadius: 14, background: "#4f46e5", border: "none", color: "#fff", fontSize: 16, fontWeight: 700, marginBottom: 10 }}>🔄 Tekrar Oyna</button>
+            <button onClick={() => setScreen("menu")} style={{ width: "100%", padding: "14px 0", borderRadius: 14, background: "#f3f4f6", border: "none", color: "#374151", fontSize: 16, fontWeight: 600 }}>← Ana Menü</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── CREATE/EDIT ──────────────────────────────────────
+  if (screen === "create") {
+    const canSave = createCat.trim() && createWords.length > 0;
+    return (
+      <div style={{ minHeight: "100vh", background: "#f9fafb", padding: "24px 16px" }}>
+        <div style={{ maxWidth: 420, margin: "0 auto" }}>
+          <button onClick={() => setScreen("menu")} style={{ background: "none", border: "none", color: "#4f46e5", fontSize: 15, marginBottom: 16, padding: 0 }}>← Geri</button>
+          <h2 style={{ fontSize: 26, fontWeight: 800, color: "#1e1b4b", marginBottom: 20 }}>{editKey ? "✏️ Düzenle" : "✏️ Oyun Oluştur"}</h2>
+          <label style={{ fontSize: 13, color: "#6b7280", fontWeight: 600 }}>KATEGORİ ADI</label>
+          <input value={createCat} onChange={e => setCreateCat(e.target.value)} placeholder="ör. Türk Oyuncular" style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: "1.5px solid #e5e7eb", fontSize: 15, marginTop: 8, marginBottom: 20, outline: "none" }} />
+          <label style={{ fontSize: 13, color: "#6b7280", fontWeight: 600 }}>KELİMELER ({createWords.length})</label>
+          <div style={{ display: "flex", gap: 8, margin: "8px 0 12px" }}>
+            <input value={wordInput} onChange={e => setWordInput(e.target.value)} onKeyDown={e => e.key === "Enter" && addWord()} placeholder="Kelime yaz, Enter veya Ekle" style={{ flex: 1, padding: "10px 14px", borderRadius: 10, border: "1.5px solid #e5e7eb", fontSize: 15, outline: "none" }} />
+            <button onClick={addWord} style={{ padding: "10px 16px", borderRadius: 10, background: "#4f46e5", border: "none", color: "#fff", fontWeight: 700 }}>Ekle</button>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, minHeight: 40, marginBottom: 28 }}>
+            {createWords.map(w => (
+              <span key={w} style={{ background: "#ede9fe", color: "#4f46e5", borderRadius: 99, padding: "6px 12px", fontSize: 14, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
+                {w}<span onClick={() => removeWord(w)} style={{ cursor: "pointer", color: "#7c3aed", fontWeight: 900 }}>×</span>
+              </span>
+            ))}
+            {createWords.length === 0 && <span style={{ color: "#d1d5db", fontSize: 14 }}>Henüz kelime yok...</span>}
+          </div>
+          <button onClick={saveGame} disabled={!canSave} style={{ width: "100%", padding: "15px 0", borderRadius: 14, background: canSave ? "#4f46e5" : "#e5e7eb", border: "none", color: canSave ? "#fff" : "#9ca3af", fontSize: 16, fontWeight: 700 }}>💾 Kaydet</button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── MENU ─────────────────────────────────────────────
+  return (
+    <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#1e1b4b 0%,#312e81 60%,#4f46e5 100%)", padding: "32px 16px" }}>
+      <div style={{ maxWidth: 420, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 28 }}>
+          <div style={{ fontSize: 48 }}>🎯</div>
+          <h1 style={{ fontSize: 32, fontWeight: 900, color: "#fff", margin: "8px 0 4px" }}>Heads Up!</h1>
+          <p style={{ color: "#a5b4fc", fontSize: 15 }}>📱 Telefonu yan çevir ve alnına tut!</p>
+        </div>
+        <div style={{ background: "#ffffff18", borderRadius: 18, padding: "16px 20px", marginBottom: 20 }}>
+          <div style={{ color: "#c7d2fe", fontSize: 12, fontWeight: 700, letterSpacing: 1.5, marginBottom: 10 }}>⏱ SÜRE</div>
+          <div style={{ display: "flex", gap: 10 }}>
+            {TIMERS.map(t => (
+              <button key={t} onClick={() => setSelectedTimer(t)} style={{ flex: 1, padding: "10px 0", borderRadius: 12, border: selectedTimer === t ? "2px solid #818cf8" : "2px solid transparent", background: selectedTimer === t ? "#4f46e5" : "#ffffff22", color: "#fff", fontSize: 16, fontWeight: 700 }}>{t}s</button>
+            ))}
+          </div>
+        </div>
+        <div style={{ color: "#c7d2fe", fontSize: 12, fontWeight: 700, letterSpacing: 1.5, marginBottom: 10 }}>📂 KATEGORİLER</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20 }}>
+          {Object.keys(DEFAULT_CATEGORIES).map(cat => {
+            const ri = remainingInfo(cat, allCats);
+            return (
+              <button key={cat} onClick={() => setSelectedCat(cat)} style={{ padding: "16px 20px", borderRadius: 16, background: selectedCat === cat ? "#4f46e5" : "#ffffff18", border: selectedCat === cat ? "2px solid #818cf8" : "2px solid transparent", color: "#fff", fontSize: 15, fontWeight: 600, textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span>{cat}</span><span style={{ fontSize: 11, color: ri.color }}>{ri.text}</span>
+              </button>
+            );
+          })}
+        </div>
+        {Object.keys(created).length > 0 && (
+          <>
+            <div style={{ color: "#86efac", fontSize: 12, fontWeight: 700, letterSpacing: 1.5, marginBottom: 10 }}>🛠 OLUŞTURULAN OYUNLAR</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20 }}>
+              {Object.keys(created).map(cat => {
+                const ri = remainingInfo(cat, allCats);
+                return (
+                  <div key={cat} style={{ borderRadius: 16, overflow: "hidden", border: selectedCat === cat ? "2px solid #4ade80" : "2px solid transparent" }}>
+                    <button onClick={() => setSelectedCat(cat)} style={{ width: "100%", padding: "16px 20px", background: selectedCat === cat ? "#16a34a" : "#ffffff18", border: "none", color: "#fff", fontSize: 15, fontWeight: 600, textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span>{cat}</span><span style={{ fontSize: 11, color: ri.color }}>{ri.text}</span>
+                    </button>
+                    <div style={{ display: "flex", background: "#ffffff10" }}>
+                      <button onClick={() => openEdit(cat)} style={{ flex: 1, padding: "9px 0", background: "none", border: "none", borderRight: "1px solid #ffffff15", color: "#a5b4fc", fontSize: 13, fontWeight: 600 }}>✏️ Düzenle</button>
+                      <button onClick={() => setConfirmDelete(cat)} style={{ flex: 1, padding: "9px 0", background: "none", border: "none", color: "#fca5a5", fontSize: 13, fontWeight: 600 }}>🗑 Sil</button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+        <button onClick={startGame} disabled={!selectedCat} style={{ width: "100%", padding: "18px 0", borderRadius: 18, background: selectedCat ? "#818cf8" : "#ffffff22", border: "none", color: selectedCat ? "#fff" : "#ffffff55", fontSize: 18, fontWeight: 800, marginBottom: 12 }}>
+          {selectedCat ? `▶ Başla — ${selectedCat}` : "Önce kategori seç"}
+        </button>
+        <button onClick={openCreate} style={{ width: "100%", padding: "15px 0", borderRadius: 18, background: "#ffffff18", border: "2px solid #ffffff33", color: "#fff", fontSize: 16, fontWeight: 700 }}>✏️ Oyun Oluştur</button>
+      </div>
+      {confirmDelete && (
+        <div style={{ position: "fixed", inset: 0, background: "#000a", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 99, padding: 24 }}>
+          <div style={{ background: "#fff", borderRadius: 24, padding: "32px 24px", maxWidth: 320, width: "100%", textAlign: "center" }}>
+            <div style={{ fontSize: 36, marginBottom: 12 }}>🗑</div>
+            <h3 style={{ fontSize: 20, fontWeight: 800, color: "#1e1b4b", marginBottom: 8 }}>"{confirmDelete}" silinsin mi?</h3>
+            <p style={{ color: "#6b7280", fontSize: 14, marginBottom: 24 }}>Bu işlem geri alınamaz.</p>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={() => setConfirmDelete(null)} style={{ flex: 1, padding: "12px 0", borderRadius: 12, background: "#f3f4f6", border: "none", color: "#374151", fontSize: 15, fontWeight: 600 }}>İptal</button>
+              <button onClick={() => deleteGame(confirmDelete)} style={{ flex: 1, padding: "12px 0", borderRadius: 12, background: "#ef4444", border: "none", color: "#fff", fontSize: 15, fontWeight: 700 }}>Sil</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
-  return div({style:{minHeight:"100vh",background:"linear-gradient(135deg,#1e1b4b,#312e81)",padding:"32px 16px",display:"flex",flexDirection:"column",alignItems:"center"}},[
-    div({style:{background:"#fff",borderRadius:"28px",padding:"32px 24px",maxWidth:"400px",width:"100%",boxShadow:"0 8px 40px rgba(0,0,0,.4)"}},[
-      div({style:{textAlign:"center",marginBottom:"20px"}},[
-        div({style:{fontSize:"48px"}},["🎉"]),
-        div({style:{fontSize:"26px",fontWeight:"800",color:"#1e1b4b",margin:"8px 0 2px"}},["Süre Doldu!"]),
-        div({style:{color:"#6b7280"}},[selCat])
-      ]),
-      div({style:{display:"flex",gap:"12px",justifyContent:"center",marginBottom:"20px"}},[
-        div({style:{background:"#f0fdf4",borderRadius:"16px",padding:"16px 24px",textAlign:"center"}},[
-          div({style:{fontSize:"36px",fontWeight:"800",color:"#16a34a"}},[String(correct)]),
-          div({style:{fontSize:"13px",color:"#16a34a"}},["Doğru"])
-        ]),
-        div({style:{background:"#fef2f2",borderRadius:"16px",padding:"16px 24px",textAlign:"center"}},[
-          div({style:{fontSize:"36px",fontWeight:"800",color:"#dc2626"}},[String(passed)]),
-          div({style:{fontSize:"13px",color:"#dc2626"}},["Pas"])
-        ])
-      ]),
-      items.length?div({style:{marginBottom:"20px"}},[
-        div({style:{fontSize:"12px",fontWeight:"700",color:"#6b7280",letterSpacing:"1.5px",marginBottom:"10px"}},["BU TURDAKİ KELİMELER"]),
-        div({style:{display:"flex",flexDirection:"column",gap:"6px",maxHeight:"220px",overflowY:"auto"}},items)
-      ]):null,
-      btn({style:{width:"100%",padding:"14px 0",borderRadius:"14px",background:"#4f46e5",border:"none",color:"#fff",fontSize:"16px",fontWeight:"700",marginBottom:"10px"},onClick:startGame},["🔄 Tekrar Oyna"]),
-      btn({style:{width:"100%",padding:"14px 0",borderRadius:"14px",background:"#f3f4f6",border:"none",color:"#374151",fontSize:"16px",fontWeight:"600"},onClick:()=>set({screen:"menu"})},["← Ana Menü"])
-    ])
-  ]);
 }
-
-function renderCreate(){
-  const{createCat,createWords,wordInput,editKey}=S;
-  const canSave=createCat.trim()&&createWords.length>0;
-  const catInp=inp({value:createCat,placeholder:"ör. Türk Oyuncular",style:{width:"100%",padding:"10px 14px",borderRadius:"10px",border:"1.5px solid #e5e7eb",fontSize:"15px",outline:"none",marginTop:"8px",marginBottom:"20px"}});
-  catInp.addEventListener("input",e=>{S.createCat=e.target.value;});
-  const wInp=inp({value:wordInput,placeholder:"Kelime yaz, Enter veya Ekle",style:{flex:"1",padding:"10px 14px",borderRadius:"10px",border:"1.5px solid #e5e7eb",fontSize:"15px",outline:"none"}});
-  wInp.addEventListener("input",e=>{S.wordInput=e.target.value;});
-  wInp.addEventListener("keydown",e=>{if(e.key==="Enter")addWord();});
-  const chips=createWords.map(w=>span({style:{background:"#ede9fe",color:"#4f46e5",borderRadius:"99px",padding:"6px 12px",fontSize:"14px",fontWeight:"600",display:"inline-flex",alignItems:"center",gap:"6px"}},[
-    w,span({style:{cursor:"pointer",color:"#7c3aed",fontWeight:"900"},onClick:()=>removeWord(w)},["×"])
-  ]));
-  return div({style:{minHeight:"100vh",background:"#f9fafb",padding:"env(safe-area-inset-top,24px) 16px 24px"}},[
-    div({style:{maxWidth:"420px",margin:"0 auto"}},[
-      btn({style:{background:"none",border:"none",color:"#4f46e5",fontSize:"15px",marginBottom:"16px",padding:"0"},onClick:()=>set({screen:"menu"})},["← Geri"]),
-      div({style:{fontSize:"26px",fontWeight:"800",color:"#1e1b4b",marginBottom:"20px"}},[editKey?"✏️ Düzenle":"✏️ Oyun Oluştur"]),
-      div({style:{fontSize:"13px",color:"#6b7280",fontWeight:"600"}},["KATEGORİ ADI"]),
-      catInp,
-      div({style:{fontSize:"13px",color:"#6b7280",fontWeight:"600"}},["KELİMELER ("+createWords.length+")"]),
-      div({style:{display:"flex",gap:"8px",margin:"8px 0 12px"}},[
-        wInp,
-        btn({style:{padding:"10px 16px",borderRadius:"10px",background:"#4f46e5",border:"none",color:"#fff",fontWeight:"700"},onClick:addWord},["Ekle"])
-      ]),
-      div({style:{display:"flex",flexWrap:"wrap",gap:"8px",minHeight:"40px",marginBottom:"28px"}},
-        chips.length?chips:[span({style:{color:"#d1d5db",fontSize:"14px"}},["Henüz kelime yok..."])]
-      ),
-      btn({style:{width:"100%",padding:"15px 0",borderRadius:"14px",background:canSave?"#4f46e5":"#e5e7eb",border:"none",color:canSave?"#fff":"#9ca3af",fontSize:"16px",fontWeight:"700"},onClick:saveGame},["💾 Kaydet"])
-    ])
-  ]);
-}
-
-function renderMenu(){
-  const{selCat,selTimer,created,confirmDelete,landscape}=S;
-  const ac=allCats();
-  const createdKeys=Object.keys(created);
-  const timerBtns=TIMERS.map(t=>btn({
-    style:{flex:"1",padding:"10px 0",borderRadius:"12px",border:selTimer===t?"2px solid #818cf8":"2px solid transparent",background:selTimer===t?"#4f46e5":"rgba(255,255,255,.13)",color:"#fff",fontSize:"16px",fontWeight:"700"},
-    onClick:()=>set({selTimer:t})
-  },[t+"s"]));
-  const defBtns=Object.keys(DEFAULT_CATEGORIES).map(cat=>{
-    const ri=remInfo(cat,ac);
-    return btn({
-      style:{padding:"16px 20px",borderRadius:"16px",background:selCat===cat?"#4f46e5":"rgba(255,255,255,.11)",border:selCat===cat?"2px solid #818cf8":"2px solid transparent",color:"#fff",fontSize:"15px",fontWeight:"600",textAlign:"left",width:"100%",display:"flex",justifyContent:"space-between",alignItems:"center"},
-      onClick:()=>set({selCat:cat})
-    },[span({},[cat]),span({style:{fontSize:"11px",color:ri.color}},[ri.text])]);
-  });
-  const crBtns=createdKeys.map(cat=>{
-    const ri=remInfo(cat,ac);
-    return div({style:{borderRadius:"16px",overflow:"hidden",border:selCat===cat?"2px solid #4ade80":"2px solid transparent"}},[
-      btn({style:{width:"100%",padding:"16px 20px",background:selCat===cat?"#16a34a":"rgba(255,255,255,.11)",border:"none",color:"#fff",fontSize:"15px",fontWeight:"600",textAlign:"left",display:"flex",justifyContent:"space-between",alignItems:"center"},onClick:()=>set({selCat:cat})},[
-        span({},[cat]),span({style:{fontSize:"11px",color:ri.color}},[ri.text])
-      ]),
-      div({style:{display:"flex",background:"rgba(255,255,255,.06)"}},[
-        btn({style:{flex:"1",padding:"9px 0",background:"none",border:"none",borderRight:"1px solid rgba(255,255,255,.1)",color:"#a5b4fc",fontSize:"13px",fontWeight:"600"},onClick:()=>set({editKey:cat,createCat:cat,createWords:[...created[cat]],wordInput:"",screen:"create"})},["✏️ Düzenle"]),
-        btn({style:{flex:"1",padding:"9px 0",background:"none",border:"none",color:"#fca5a5",fontSize:"13px",fontWeight:"600"},onClick:()=>set({confirmDelete:cat})},["🗑 Sil"])
-      ])
-    ]);
-  });
-
-  const el=div({style:{minHeight:"100vh",background:"linear-gradient(160deg,#1e1b4b 0%,#312e81 60%,#4f46e5 100%)",padding:"env(safe-area-inset-top,32px) 16px 32px"}},[
-    div({style:{maxWidth:"420px",margin:"0 auto"}},[
-      div({style:{textAlign:"center",marginBottom:"28px"}},[
-        div({style:{fontSize:"48px"}},["🎯"]),
-        div({style:{fontSize:"32px",fontWeight:"900",color:"#fff",margin:"8px 0 4px"}},["Heads Up!"]),
-        div({style:{color:"#a5b4fc",fontSize:"15px"}},["📱 Telefonu yan çevir ve alnına tut!"])
-      ]),
-      div({style:{background:"rgba(255,255,255,.11)",borderRadius:"18px",padding:"16px 20px",marginBottom:"20px"}},[
-        div({style:{color:"#c7d2fe",fontSize:"12px",fontWeight:"700",letterSpacing:"1.5px",marginBottom:"10px"}},["⏱ SÜRE"]),
-        div({style:{display:"flex",gap:"10px"}},timerBtns)
-      ]),
-      div({style:{color:"#c7d2fe",fontSize:"12px",fontWeight:"700",letterSpacing:"1.5px",marginBottom:"10px"}},["📂 KATEGORİLER"]),
-      div({style:{display:"flex",flexDirection:"column",gap:"10px",marginBottom:"20px"}},defBtns),
-      ...(createdKeys.length?[
-        div({style:{color:"#86efac",fontSize:"12px",fontWeight:"700",letterSpacing:"1.5px",marginBottom:"10px"}},["🛠 OLUŞTURULAN OYUNLAR"]),
-        div({style:{display:"flex",flexDirection:"column",gap:"10px",marginBottom:"20px"}},crBtns)
-      ]:[]),
-      ...(selCat&&!landscape?[
-        div({style:{background:"rgba(251,191,36,.13)",border:"1.5px solid #fbbf24",borderRadius:"14px",padding:"12px 16px",marginBottom:"12px",textAlign:"center",color:"#fbbf24",fontSize:"14px",fontWeight:"600"}},["📱 Başlamak için telefonu yan çevir"])
-      ]:[]),
-      btn({style:{width:"100%",padding:"18px 0",borderRadius:"18px",background:selCat?"#818cf8":"rgba(255,255,255,.13)",border:"none",color:selCat?"#fff":"rgba(255,255,255,.35)",fontSize:"18px",fontWeight:"800",marginBottom:"12px"},onClick:startGame},[selCat?"▶ Başla — "+selCat:"Önce kategori seç"]),
-      btn({style:{width:"100%",padding:"15px 0",borderRadius:"18px",background:"rgba(255,255,255,.11)",border:"2px solid rgba(255,255,255,.2)",color:"#fff",fontSize:"16px",fontWeight:"700"},onClick:()=>set({editKey:null,createCat:"",createWords:[],wordInput:"",screen:"create"})},["✏️ Oyun Oluştur"])
-    ])
-  ]);
-
-  if(confirmDelete){
-    el.appendChild(div({style:{position:"fixed",inset:"0",background:"rgba(0,0,0,.65)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:"99",padding:"24px"}},[
-      div({style:{background:"#fff",borderRadius:"24px",padding:"32px 24px",maxWidth:"320px",width:"100%",textAlign:"center"}},[
-        div({style:{fontSize:"36px",marginBottom:"12px"}},["🗑"]),
-        div({style:{fontSize:"20px",fontWeight:"800",color:"#1e1b4b",marginBottom:"8px"}},["\""+confirmDelete+"\" silinsin mi?"]),
-        div({style:{color:"#6b7280",fontSize:"14px",marginBottom:"24px"}},["Bu işlem geri alınamaz."]),
-        div({style:{display:"flex",gap:"10px"}},[
-          btn({style:{flex:"1",padding:"12px 0",borderRadius:"12px",background:"#f3f4f6",border:"none",color:"#374151",fontSize:"15px",fontWeight:"600"},onClick:()=>set({confirmDelete:null})},["İptal"]),
-          btn({style:{flex:"1",padding:"12px 0",borderRadius:"12px",background:"#ef4444",border:"none",color:"#fff",fontSize:"15px",fontWeight:"700"},onClick:()=>deleteGame(confirmDelete)},["Sil"])
-        ])
-      ])
-    ]));
-  }
-  return el;
-}
-
-// ── Main render ───────────────────────────────────────────
-function render(){
-  const app=document.getElementById("app");
-  app.innerHTML="";
-  onScreenChange(S.screen);
-  if(S.screen==="countdown")app.appendChild(renderCountdown());
-  else if(S.screen==="paused")app.appendChild(renderPaused());
-  else if(S.screen==="playing")app.appendChild(renderPlaying());
-  else if(S.screen==="result")app.appendChild(renderResult());
-  else if(S.screen==="create")app.appendChild(renderCreate());
-  else app.appendChild(renderMenu());
-}
-
-// Keyboard (masaüstü test için)
-window.addEventListener("keydown",e=>{
-  if(S.screen!=="playing")return;
-  if(e.key==="ArrowUp")doCorrect();
-  if(e.key==="ArrowDown")doPass();
-});
-
-render();
-</script>
-</body>
-</html>
