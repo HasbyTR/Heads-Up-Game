@@ -315,11 +315,12 @@ export default function App() {
     setTimeLeft(selectedTimer); setFlash(null);
 
     requestPermissionThen(() => {
-      // Check current orientation
-      if (checkLandscape(gammaRef.current)) {
-        beginCountdown(); // already landscape → straight to countdown
+      // gamma null ise henüz sensör ölçümü gelmemiş → güvenli taraf: bekle
+      const g = gammaRef.current;
+      if (g !== null && checkLandscape(g)) {
+        beginCountdown();
       } else {
-        setScreen("waitLandscape"); // portrait → wait for landscape
+        setScreen("waitLandscape");
       }
     });
   }
