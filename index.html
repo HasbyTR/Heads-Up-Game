@@ -122,7 +122,14 @@ let tiltCooldown = false;
 let orientReady = false;
 
 function isLandscape(gamma) {
+  // Telefon yan (landscape): |gamma| > 45
   return gamma !== null && Math.abs(gamma) > 45;
+}
+
+function isPortrait(gamma) {
+  // Telefon dik (portrait): |gamma| < 30  → pause için daha geniş tolerans
+  // yani 30-45 arası "geçiş zonu" — ne pause ne de landscape tetikler
+  return gamma !== null && Math.abs(gamma) < 30;
 }
 
 function onOrient(e) {
@@ -132,36 +139,42 @@ function onOrient(e) {
   lastGamma = gamma;
 
   const land = isLandscape(gamma);
+  const port = isPortrait(gamma);
 
-  // Screen transitions based on orientation
+  // waitLand → countdown: telefon yana gelince başlat
   if (G.screen === 'waitLand' && land) {
     startCountdown();
     return;
   }
-  if (G.screen === 'playing' && !land) {
+
+  // playing → paused: sadece gerçekten dik tutulunca (|gamma| < 30)
+  if (G.screen === 'playing' && port) {
     pauseGame();
     return;
   }
+
+  // paused → playing: tekrar yana gelince devam
   if (G.screen === 'paused' && land) {
     resumeGame();
     return;
   }
 
-  // Tilt detection — only during active play and landscape
+  // Tilt — sadece oyun sırasında, landscape'de ve cooldown yoksa
   if (G.screen !== 'playing' || !land || tiltCooldown) return;
   if (beta === null) return;
 
-  // beta < -20 → ekran yukarı → DOĞRU
-  if (beta < -20) {
+  // En az 50° eğim gerekiyor
+  // beta < -50 → ekran yukarı → DOĞRU
+  if (beta < -50) {
     tiltCooldown = true;
     doCorrect();
-    setTimeout(() => { tiltCooldown = false; }, 1300);
+    setTimeout(() => { tiltCooldown = false; }, 1400);
   }
-  // beta > 20 → ekran aşağı → PAS
-  else if (beta > 20) {
+  // beta > 50 → ekran aşağı → PAS
+  else if (beta > 50) {
     tiltCooldown = true;
     doPass();
-    setTimeout(() => { tiltCooldown = false; }, 1300);
+    setTimeout(() => { tiltCooldown = false; }, 1400);
   }
 }
 
