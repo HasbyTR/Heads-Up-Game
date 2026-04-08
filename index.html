@@ -121,36 +121,26 @@ let lastGamma = null;
 let tiltCooldown = false;
 let orientReady = false;
 
-// Telefon landscape (heads-up pozisyonu):
-// |gamma| ≈ 90 (±20 tolerans) VE beta ≈ 0 veya ≈ ±180
 function isLandscape(beta, gamma) {
   if (beta === null || gamma === null) return false;
-  const gammaCloseTo90 = (90 - Math.abs(gamma)) < 20;
-  const betaCloseTo0   = Math.abs(beta) < 15;
-  const betaCloseTo180 = (180 - Math.abs(beta)) < 15;
-  return gammaCloseTo90 && (betaCloseTo0 || betaCloseTo180);
+  return Math.abs(gamma) > 75;
 }
 
-// Telefon dik (portrait): beta ≈ 90 → pause
-function isPortrait(beta) {
-  if (beta === null) return false;
-  return Math.abs(90 - beta) < 15;
+function isPortrait(beta, gamma) {
+  if (beta === null || gamma === null) return false;
+  return Math.abs(gamma) < 30;
 }
 
-// Doğru: |gamma| < 50 VE beta ≈ 0 (ekran yukarı baktı)
 function isTiltedUp(beta, gamma) {
   if (beta === null || gamma === null) return false;
-  const gammaInRange = Math.abs(gamma) < 50 && Math.abs(gamma) > 0;
-  const betaCloseTo0 = Math.abs(beta) < 25;
-  return gammaInRange && betaCloseTo0;
+  const nb = gamma >= 0 ? beta : -beta;
+  return nb < -50;
 }
 
-// Pas: |gamma| < 50 VE beta ≈ ±180 (ekran aşağı baktı)
 function isTiltedDown(beta, gamma) {
   if (beta === null || gamma === null) return false;
-  const gammaInRange = Math.abs(gamma) < 50 && Math.abs(gamma) > 0;
-  const betaCloseTo180 = (180 - Math.abs(beta)) < 25;
-  return gammaInRange && betaCloseTo180;
+  const nb = gamma >= 0 ? beta : -beta;
+  return nb > 50;
 }
 
 function onOrient(e) {
@@ -454,8 +444,9 @@ function screenPlaying() {
     // Buttons
     D({ style: { width: '100%', maxWidth: '420px' } },
       D({ style: { color: '#ffffff80', textAlign: 'center', fontSize: '12px', marginBottom: '12px' } },
-        'Ekran YUKARI (beta<-20) → ✅   Ekran AŞAĞI (beta>20) → ⏭'
+        'Ekran YUKARI → ✅   Ekran AŞAĞI → ⏭'
       ),
+      D({ id: 'playDebug', style: { color: '#fbbf24', textAlign: 'center', fontSize: '12px', marginBottom: '8px' } }, ''),
       D({ style: { display: 'flex', gap: '12px' } },
         B({ style: { flex: '1', padding: '22px 0', borderRadius: '18px', background: '#ef4444', color: '#fff', fontSize: '18px', fontWeight: '700' }, onClick: doPass }, '⬇ Pas'),
         B({ style: { flex: '1', padding: '22px 0', borderRadius: '18px', background: '#22c55e', color: '#fff', fontSize: '18px', fontWeight: '700' }, onClick: doCorrect }, '⬆ Doğru')
@@ -611,7 +602,7 @@ function screenMenu() {
         D({ style: { fontSize: '52px' } }, '🎯'),
         D({ style: { fontSize: '34px', fontWeight: '900', color: '#fff', margin: '8px 0 4px' } }, 'Heads Up!'),
         D({ style: { color: '#a5b4fc', fontSize: '15px' } }, '📱 Telefonu yan çevir ve alnına tut!'),
-      D({ style: { color: '#ffffff30', fontSize: '11px', marginTop: '6px' } }, 'v1.0.1-debug')
+      D({ style: { color: '#ffffff30', fontSize: '11px', marginTop: '6px' } }, 'v1.0.2-debug')
       ),
       D({ style: { background: 'rgba(255,255,255,.12)', borderRadius: '20px', padding: '18px 20px', marginBottom: '24px' } },
         D({ style: { color: '#c7d2fe', fontSize: '11px', fontWeight: '700', letterSpacing: '2px', marginBottom: '12px' } }, '⏱ SÜRE'),
