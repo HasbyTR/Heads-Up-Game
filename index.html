@@ -121,26 +121,36 @@ let lastGamma = null;
 let tiltCooldown = false;
 let orientReady = false;
 
-function isLandscape(gamma) {
-  // Telefon yan: |gamma| > 75
-  return gamma !== null && Math.abs(gamma) > 75;
+// Telefon landscape (heads-up pozisyonu):
+// |gamma| ≈ 90 (±20 tolerans) VE beta ≈ 0 veya ≈ ±180
+function isLandscape(beta, gamma) {
+  if (beta === null || gamma === null) return false;
+  const gammaCloseTo90 = (90 - Math.abs(gamma)) < 20;
+  const betaCloseTo0   = Math.abs(beta) < 15;
+  const betaCloseTo180 = (180 - Math.abs(beta)) < 15;
+  return gammaCloseTo90 && (betaCloseTo0 || betaCloseTo180);
 }
 
-function isPortrait(gamma) {
-  // Telefon dik: |gamma| < 30 → pause tetikler
-  // 30-75 arası geçiş zonu — hiçbir şey tetiklenmez
-  return gamma !== null && Math.abs(gamma) < 30;
+// Telefon dik (portrait): beta ≈ 90 → pause
+function isPortrait(beta) {
+  if (beta === null) return false;
+  return Math.abs(90 - beta) < 15;
 }
 
-// Beta'yı gamma işaretine göre normalize et:
-// Sağa yatık (gamma>0): beta olduğu gibi kullanılır
-// Sola yatık (gamma<0): beta'nın işareti tersine çevrilir
-// Böylece her iki yatış yönünde de:
-//   normalizedBeta < -50 → ekran yukarı → DOĞRU
-//   normalizedBeta >  50 → ekran aşağı  → PAS
-function normalizedBeta(beta, gamma) {
-  if (beta === null || gamma === null) return null;
-  return gamma >= 0 ? beta : -beta;
+// Doğru: |gamma| < 50 VE beta ≈ 0 (ekran yukarı baktı)
+function isTiltedUp(beta, gamma) {
+  if (beta === null || gamma === null) return false;
+  const gammaInRange = Math.abs(gamma) < 50 && Math.abs(gamma) > 0;
+  const betaCloseTo0 = Math.abs(beta) < 25;
+  return gammaInRange && betaCloseTo0;
+}
+
+// Pas: |gamma| < 50 VE beta ≈ ±180 (ekran aşağı baktı)
+function isTiltedDown(beta, gamma) {
+  if (beta === null || gamma === null) return false;
+  const gammaInRange = Math.abs(gamma) < 50 && Math.abs(gamma) > 0;
+  const betaCloseTo180 = (180 - Math.abs(beta)) < 25;
+  return gammaInRange && betaCloseTo180;
 }
 
 function onOrient(e) {
@@ -341,7 +351,7 @@ function startGame() {
   requestOrientPermission(() => {
     // If gamma is known and landscape → go straight to countdown
     // If gamma unknown (null) or portrait → wait for landscape
-    if (lastGamma !== null && isLandscape(lastGamma)) {
+    if (lastGamma !== null && isLandscape(lastBeta, lastGamma)) {
       startCountdown();
     } else {
       goScreen('waitLand');
