@@ -394,7 +394,8 @@ function screenWaitLand() {
       D({ style: { fontSize: '80px', marginBottom: '24px' } }, '📱'),
       D({ style: { fontSize: '24px', fontWeight: '800', color: '#fff', marginBottom: '12px' } }, 'Telefonu yan çevirin'),
       D({ style: { fontSize: '16px', color: '#a5b4fc', marginBottom: '8px' } }, 've alnınıza dayayın'),
-      D({ style: { fontSize: '13px', color: '#64748b', marginTop: '28px' } }, G.selCat)
+      D({ id: 'debugBox', style: { fontSize: '13px', color: '#fbbf24', marginTop: '28px', lineHeight: '2' } }, 'Sensör bekleniyor...'),
+      D({ style: { fontSize: '13px', color: '#64748b', marginTop: '12px' } }, G.selCat)
     )
   );
 }
