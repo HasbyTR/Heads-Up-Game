@@ -19,7 +19,7 @@ input{font-family:inherit;outline:none;}
 <div id="root"></div>
 <script>
 
-const VERSION = 'v1.0.7-debug';
+const VERSION = 'v1.0.8-debug';
 
 // ── Data ─────────────────────────────────────────────────
 const CATS = {
@@ -183,8 +183,11 @@ function startGame() {
   // iOS 13+ izin
   if (typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.requestPermission==='function') {
     DeviceOrientationEvent.requestPermission().then(r=>{
-      alert('İzin: '+r+' | beta:'+lastBeta+' gamma:'+lastGamma);
-      // listener zaten window'a ekli, tekrar eklemeye gerek yok
+      if (r==='granted') {
+        // İzin verildikten sonra listener'ı yeniden ekle
+        window.removeEventListener('deviceorientation', onOrient, true);
+        window.addEventListener('deviceorientation', onOrient, true);
+      }
       setTimeout(()=>{
         if (lastGamma!==null && isLandscape(lastBeta,lastGamma)) startCountdown();
         else goScreen('waitLand');
