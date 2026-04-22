@@ -19,7 +19,7 @@ input{font-family:inherit;outline:none;}
 <div id="root"></div>
 <script>
 
-const VERSION = 'v1.0.12';
+const VERSION = 'v1.0.14';
 
 // ── Data ─────────────────────────────────────────────────
 const CATS = {
@@ -76,8 +76,11 @@ let tiltCooldown = false;
 
 function isLandscape(b,g) { return g!==null && Math.abs(g)>75; }
 function isPortrait(b,g)  { return b!==null && Math.abs(90-b)<20; }
-function isTiltedUp(b,g)  { if(b===null||g===null)return false; return (g>=0?b:-b) < -50; }
-function isTiltedDown(b,g){ if(b===null||g===null)return false; return (g>=0?b:-b) > 50; }
+// Landscape'de gamma 90 civarı = düz tutulmuş
+// gamma > 130 → ekran yukarı (doğru)
+// gamma < 50  → ekran aşağı (pas)
+function isTiltedUp(b,g)  { if(g===null)return false; return Math.abs(g) > 130; }
+function isTiltedDown(b,g){ if(g===null)return false; return Math.abs(g) < 50; }
 
 function onOrient(e) {
   const beta=e.beta, gamma=e.gamma;
