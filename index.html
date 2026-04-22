@@ -19,7 +19,7 @@ input{font-family:inherit;outline:none;}
 <div id="root"></div>
 <script>
 
-const VERSION = 'v1.0.15-debug';
+const VERSION = 'v1.0.16-debug';
 
 // ── Data ─────────────────────────────────────────────────
 const CATS = {
@@ -76,11 +76,11 @@ let tiltCooldown = false;
 
 function isLandscape(b,g) { return g!==null && Math.abs(g)>75; }
 function isPortrait(b,g)  { return b!==null && Math.abs(90-b)<20; }
-// Landscape'de gamma 90 civarı = düz tutulmuş
-// gamma > 130 → ekran yukarı (doğru)
-// gamma < 50  → ekran aşağı (pas)
-function isTiltedUp(b,g)  { if(g===null)return false; return Math.abs(g) > 130; }
-function isTiltedDown(b,g){ if(g===null)return false; return Math.abs(g) < 50; }
+// Landscape'de beta 0 civarı = düz
+// beta > 40  → bir yön
+// beta < -40 → diğer yön
+function isTiltedUp(b,g)  { if(b===null)return false; return b > 40; }
+function isTiltedDown(b,g){ if(b===null)return false; return b < -40; }
 
 function onOrient(e) {
   const beta=e.beta, gamma=e.gamma;
@@ -251,7 +251,8 @@ function screenCountdown() {
       D({style:{fontSize:'14px',color:'#a5b4fc',fontWeight:'700',letterSpacing:'2px',marginBottom:'8px'}},'TELEFONUNUZU ALNINIZIA DAYAYIN'),
       D({style:{fontSize:'16px',color:'#818cf8',marginBottom:'36px'}},'Hazır olun!'),
       D({id:'cdNum',style:{fontSize:'130px',fontWeight:'900',color:'#fff',lineHeight:'1',animation:'pulse 1s ease-in-out infinite',display:'block'}},G.countdown),
-      D({style:{fontSize:'15px',color:'#a5b4fc',marginTop:'36px'}},G.selCat)
+      D({style:{fontSize:'15px',color:'#a5b4fc',marginTop:'36px'}},G.selCat),
+      D({id:'debugBox',style:{fontSize:'13px',color:'#fbbf24',marginTop:'16px'}})
     )
   );
 }
